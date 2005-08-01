@@ -20,10 +20,10 @@ use constant kJobPrefix		=> "../src/data/jid_";
 use constant kTitle => "XT3 Wired View";
 
 # XXX This should be read through sys.argv
-use constant kRotX => "60";
-use constant kRotZ => "20";
-use constant kScalX => "1";
-use constant kScalZ => "1";
+use constant kRotX => 60;
+use constant kRotZ => 20;
+use constant kScalX => 1;
+use constant kScalZ => 1;
 
 my @gNid2Pos;
 my @gJobList;
@@ -86,10 +86,7 @@ sub file_list {
 	my $list = "";
 
 	# string the files together
-	foreach my $file (@gJobList) {
-		$list .= "'$file',";
-	}
-
+	$list .= "'$_'," foreach (@gJobList);
 	chop $list;
 
 	# Now add disabled & free nodes if there were any
@@ -101,9 +98,7 @@ sub file_list {
 
 # delete the temporary files
 sub clear_files {
-	foreach my $file (@gJobList) {
-		unlink $file;
-	}
+	unlink $_ foreach (@gJobList);
 
 	unlink kDisabledFile if $gDisabled;
 	unlink kFreeFile if $gFree;
