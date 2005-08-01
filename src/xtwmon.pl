@@ -10,8 +10,8 @@ use warnings;
 use constant _PATH_WIMAP => "data/rtrtrace";
 use constant _PATH_JOBMAP => "data/nids_list_phantom";
 
-use constant IMG_WIDTH => 600;
-use constant IMG_HEIGHT => 400;
+use constant IMG_WIDTH => 500;
+use constant IMG_HEIGHT => 300;
 
 use constant DIM_X => 0;
 use constant DIM_Y => 1;
@@ -100,7 +100,7 @@ sub cen {
 	}
 
 	$img->stringFT($col, $fn, $sz, 0,
-	    ($sx + $ex) / 2 - $ren_w / 2, $y, $str);
+	    ($sx + $ex) / 2 - $ren_w / 2 + 1, $y, $str);
 	return ($ren_w, $ren_h);
 }
 
@@ -138,8 +138,8 @@ sub gen {
 
 	my $uincr = IMG_WIDTH / ($max[$udim] + 1);
 	my $vincr = (IMG_HEIGHT - $used_h) / ($max[$vdim] + 1);
-	my $node_w = $uincr - 10;
-	my $node_h = $vincr - 10;
+	my $node_w = $uincr - 3;
+	my $node_h = $vincr - 3;
 
 	my ($upstart, $vpstart);
 	$upstart = 0;
@@ -162,7 +162,24 @@ sub gen {
 		$_y = \$v;
 		$_z = \$pos;
 		$vincr *= -1;
-		$vpstart = IMG_HEIGHT + $vincr;
+		$vpstart = IMG_HEIGHT + $vincr; # - 1 ?
+	}
+
+	# Draw V axes.
+	for ($u = 0, $up = $upstart;
+	    $u < $max[$udim] + 1;
+	    $u++, $up += $uincr) {
+		$img->line($up + $node_w/2, $used_h, $up + $node_w/2,
+		    IMG_HEIGHT - 2 - $node_h/2, $col{$dimcol[$vdim]});
+	}
+
+	# Draw U axes.
+	for ($v = 0, $vp = $vpstart;
+	    $v < $max[$vdim] + 1;
+	    $v++, $vp += $vincr) {
+		$img->line($upstart, $vp + $node_h/2,
+		    IMG_WIDTH - 2 - $node_w/2, $vp + $node_h/2,
+		    $col{$dimcol[$udim]});
 	}
 
 	for ($u = 0, $up = $upstart;
@@ -172,12 +189,13 @@ sub gen {
 		    $v < $max[$vdim] + 1;
 		    $v++, $vp += $vincr) {
 			my $node = $nodes[$$_x][$$_y][$$_z];
-			unless ($node) {
-				$node = {
-					nid => -1,
-					col => $statecol[ST_UNAC]
-				};
-			}
+			next unless $node;
+#			unless ($node) {
+#				$node = {
+#					nid => -1,
+#					col => $statecol[ST_UNAC]
+#				};
+#			}
 			my $col = $node->{col};
 			$col = $$col if ref $col eq "REF";
 			$img->filledRectangle($up, $vp,
@@ -187,6 +205,17 @@ sub gen {
 			    $up + $node_w, $vp + $node_h, $col_black);
 			cen($img, $node->{nid}, $up, $up + $node_w,
 			    $vp, $vp + $node_h, $col_black, 1);
+
+
+=cut
+		<map name="latest/map.html#xz">
+		</map>
+		<map name="latest/map.htmlxy">
+		</map>
+		<map name="latest/map.htmlyz">
+		</map>
+=cut
+
 		}
 	}
 
