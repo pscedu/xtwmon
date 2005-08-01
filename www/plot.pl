@@ -33,7 +33,7 @@ my $gFree = 0;
 
 # Command Line Args
 my $argc;
-my @view;
+my @view = (kRotX, kRotZ, kScalX, kScalZ);
 my $argnum;
 
 $argc = $#ARGV + 1;
@@ -41,10 +41,6 @@ $argc = $#ARGV + 1;
 if($argc < 2)
 {
 	print "using default view\n";
-	$view[0] = kRotX;
-	$view[1] = kRotZ;
-	$view[2] = kScalX;
-	$view[3] = kScalZ;
 }
 
 foreach $argnum (0 .. $#ARGV)
