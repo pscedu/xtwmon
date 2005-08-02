@@ -86,9 +86,11 @@ $r->print(<<EOF);
 				<td><img alt="[yz]" border="0" usemap="map.html#yz"
 					 src="latest/x$x_pos.png" /></td>
 			</tr>
+			<tr>
+				<td colspan="3" align="center">
+					<img alt="[nav]" border="0" usemap="#nav" src="nav.png" /></td>
+			</tr>
 		</table>
-		<div align="center">
-			<img alt="[nav]" border="0" usemap="#nav" src="nav.png" /></div>
 		<div class="micro">Copyright &copy; 2005
 		  <a href="http://www.psc.edu/">Pittsburgh Supercomputing Center</a></div>
 	</body>
