@@ -1,0 +1,8 @@
+$Id$
+
+use a non-greyscale job color mapping algorithm
+add controls for theta/phi to control the view for the 3d plot
+add a column of job info
+add selnode stuff
+highlight the planes of the current position in the 3d plot
+revise plot so that no temp files are created
