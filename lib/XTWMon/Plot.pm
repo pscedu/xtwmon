@@ -54,13 +54,15 @@ sub gnu_plot {
 	    "<pipe", \*IN, ">pipe", \*OUT, "2>pipe", \*ERR)
 	    or $obj->err(_PATH_GNUPLOT);
 	print IN <<EOF;
-set term png
+set terminal png small color picsize 500 300
 set view $rx, $rz, $sx, $sz
 set xlabel "X"
 set ylabel "Y"
 set zlabel "Z"
+set zrange [0:20]
 set title "$title"
-set data style boxes
+set data style points
+set pointsize 0.5
 splot @{[$obj->file_list()]}
 EOF
 	close IN;
