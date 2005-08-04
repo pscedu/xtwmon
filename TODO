@@ -8,3 +8,4 @@ highlight the planes of the current position in the 3d plot
 revise plot so that no temp files are created
 add color backgrounds for each x,y,z image to denote planes
 use javascript to flip x,y,z pics instead of page requests
+add a lock file that gets checked so requests don't use half-made files
