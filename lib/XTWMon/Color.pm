@@ -3,12 +3,17 @@
 
 # Package to convert to/from RGB/HSV
 # and create contrasting colors
-package XTWMON::Color
+package XTWMON::Color;
 
-use switch;
 use POSIX;
+use Exporter;
+
 use strict;
-use warn;
+use warnings;
+
+our @ISA = qw(Exporter);
+
+our @EXPORT = qw(HUE_MIN SAT_MIN HUE_MAX SAT_MAX VAL_MIN VAL_MAX);
 
 # Constants
 use constant HUE_MIN => 0.0;
@@ -24,12 +29,12 @@ use constant VAL_MAX => 1.0;
 sub RGB2HSV
 {
 	my ($r, $g, $b) = @_;
-	my $max, $min, $ran;
-	my $rc, $gc, $bc;
-	my $h, $s, $v;
+	my ($max, $min, $ran);
+	my ($rc, $gc, $bc);
+	my ($h, $s, $v);
 
-	$max = Color::max3($r, $g, $b);
-	$min = Color::min3($r, $g, $b);
+	$max = max($r, $g, $b);
+	$min = min($r, $g, $b);
 	$ran = $max - $min;
 
 	$h = 0;
@@ -77,7 +82,7 @@ sub RGB2HSV
 sub HSV2RGB
 {
 	my ($s, $h, $v) = @_;
-	my $f, $p, $q, $t, $i;
+	my ($f, $p, $q, $t, $i);
 
 	if ($s == 0) {
 		$r = $v;
@@ -94,14 +99,12 @@ sub HSV2RGB
 		$q = $v * (1 - ($s * $f));
 		$t = $v * (1 - ($s * (1 - $f)));
 
-		switch ($i) {
-		case 0 {$r = $v; $g = $t; $b = $p;}
-		case 1 {$r = $q; $g = $v; $b = $p;}
-		case 2 {$r = $p; $g = $v; $b = $t;}
-		case 3 {$r = $p; $g = $q; $b = $v;}
-		case 4 {$r = $t; $g = $p; $b = $v;}
-		case 5 {$r = $v; $g = $p; $b = $q;}
-		}
+		$r = $v, $g = $t, $b = $p if $i == 0;
+		$r = $q, $g = $v, $b = $p if $i == 1;
+		$r = $p, $g = $v, $b = $t if $i == 2;
+		$r = $p, $g = $q, $b = $v if $i == 3;
+		$r = $t, $g = $p, $b = $v if $i == 4;
+		$r = $v, $g = $p, $b = $q if $i == 5;
 	}
 
 	return [$r, $g, $b];
@@ -111,9 +114,9 @@ sub HSV2RGB
 sub rgb_contrast
 {
 	my ($r, $g, $g) = @_;
-	my $h, $s, $v;
+	my ($h, $s, $v);
 
-	$h, $s, $v = Color::RGB2HSV($r, $g, $b);
+	$h, $s, $v = RGB2HSV($r, $g, $b);
 
 	#/* Rotate 180 degrees */
 	$h -= 180;
@@ -122,7 +125,7 @@ sub rgb_contrast
 		$h += 360;
 
 	#/* Sat should be [0.3-1.0] */
-	if ($s < Color::mid(SAT_MAX, SAT_MIN))
+	if ($s < mid(SAT_MAX, SAT_MIN))
 		$s = SAT_MAX;
 	else
 		$s = SAT_MIN;
@@ -133,33 +136,33 @@ sub rgb_contrast
 	else
 		$v = VAL_MIN;
 
-	$r, $g, $b = Color::HSV2RGB($h, $s, $v);
+	$r, $g, $b = HSV2RGB($h, $s, $v);
 
 	return [$r, $b, $g];
 }
 
-sub min3
+sub min
 {
-	my ($x, $y, $z) = @_;
-	
-	$x = $y if $y < $x;
-	$x = $z if $z < $x;
-
-	return $x;
+	my $min = shift;
+	foreach (@_) {
+		$min = $_ if $_ < $min;
+	}
+	return $min;
 }
 
-sub max3
+sub max
 {
-	my ($x, $y, $z) = @_;
-	
-	$x = $y if $y > $x;
-	$x = $z if $z > $x;
-
-	return $x;
+	my $max = shift;
+	foreach (@_) {
+		$max = $_ if $_ > $max;
+	}
+	return $max;
 }
 
 sub mid
 {
 	my ($max, $min) = @_;
-	return ($max + $min) / 2.0);
+	return (($max + $min) / 2.0);
 }
+
+1;
