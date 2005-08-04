@@ -49,6 +49,9 @@ my @statecol = (
 my @max;
 my @nodes;
 my @invmap;
+my %jobs;
+my @freenodes;
+my @disnodes;
 
 parse_wimap(\@max);
 
@@ -62,19 +65,13 @@ for (;;) {
 
 	parse_jobmap();
 
-	my $t;
+	gen(DIM_X, $_, "$out_dir/x$_.png") foreach (0 .. $max[DIM_X]);
+	gen(DIM_Y, $_, "$out_dir/y$_.png") foreach (0 .. $max[DIM_Y]);
+	gen(DIM_Z, $_, "$out_dir/z$_.png") foreach (0 .. $max[DIM_Z]);
 
-	for $t (0 .. $max[DIM_X]) {
-		gen(DIM_X, $t, "$out_dir/x$t.png")
-	}
-
-	for $t (0 .. $max[DIM_Y]) {
-		gen(DIM_Y, $t, "$out_dir/y$t.png")
-	}
-
-	for $t (0 .. $max[DIM_Z]) {
-		gen(DIM_Z, $t, "$out_dir/z$t.png")
-	}
+	write_jobfiles()	if %jobs;
+	write_nodes("$out_dir/free", \@freenodes)	if @freenodes;
+	write_nodes("$out_dir/disabled", \@disnodes)	if @disnodes;
 
 exit;
 	sleep(SLEEP_INTV);
@@ -129,7 +126,7 @@ sub gen {
 		[ DIM_X, DIM_Y ]
 	);
 
-	$img->fill(1, 1, $col_white);
+	$img->fill(1, 1, $col{$dimcol[$dim]});
 	my ($used_w, $used_h) = cen($img, $labels[$dim], 0, IMG_WIDTH,
 	    0, 0, $col_black, 0);
 	$used_h += 2; # Text border
@@ -165,6 +162,7 @@ sub gen {
 		$vpstart = IMG_HEIGHT + $vincr; # - 1 ?
 	}
 
+	$img->setThickness(3);
 	# Draw V axes.
 	for ($u = 0, $up = $upstart;
 	    $u < $max[$udim] + 1;
@@ -181,6 +179,7 @@ sub gen {
 		    IMG_WIDTH - 2 - $node_w/2, $vp + $node_h/2,
 		    $col{$dimcol[$udim]});
 	}
+	$img->setThickness(1);
 
 	for ($u = 0, $up = $upstart;
 	    $u < $max[$udim] + 1;
@@ -256,8 +255,11 @@ sub parse_wimap {
 		$nodes[$x] = [] unless ref $nodes[$x] eq "ARRAY";
 		$nodes[$x][$y] = [] unless ref $nodes[$x][$y] eq "ARRAY";
 		$invmap[$nid] = $nodes[$x][$y][$z] = {
-			nid => $nid,
-			col => $statecol[ST_FREE]
+			nid	=> $nid,
+			col	=> $statecol[ST_FREE],
+			x	=> $x,
+			y	=> $y,
+			z	=> $z
 		};
 		$max->[DIM_X] = $x if $x > $max->[DIM_X];
 		$max->[DIM_Y] = $y if $y > $max->[DIM_Y];
@@ -265,8 +267,6 @@ sub parse_wimap {
 	}
 	close WIMAP;
 }
-
-my %jobs;
 
 sub parse_jobmap {
 	local ($_, *JMAP);
@@ -289,10 +289,13 @@ sub parse_jobmap {
 
 		if ($enabled == 0) {
 			$node->{col} = $statecol[ST_DOWN];
+			push @disnodes, $node;
 		} elsif ($jobid) {
 			$node->{col} = \$j->{col};
+			push @{ $j->{nodes} }, $node;
 		} else {
 			$node->{col} = $statecol[ST_FREE];
+			push @freenodes, $node;
 		}
 	}
 	close JMAP;
@@ -310,7 +313,27 @@ sub job_get {
 	return $jobs{$jobid} if $jobs{$jobid};
 	$jobs{$jobid} = {
 		id => $jobid,
+		nodes => []
 	};
+}
+
+sub write_jobfiles {
+	local *F;
+	my ($jobid, $job, $fn);
+	while (($jobid, $job) = each %jobs) {
+		# XXX: sanity check?
+		$fn = "$out_dir/jid_$jobid";
+		write_nodes($fn, $job->{nodes});
+	}
+}
+
+sub write_nodes {
+	my ($fn, $r_nodes) = @_;
+	local *F;
+
+	open F, "> $fn" or err($fn);
+	print F "@$_{qw(x y z)}\n" foreach (@$r_nodes);
+	close F;
 }
 
 sub col_get {
