@@ -70,7 +70,7 @@ sub RGB2HSV
 		}
 	}
 
-	return ($h, $s, $v);
+	return [$h, $s, $v];
 }
 
 
@@ -103,6 +103,8 @@ sub HSV2RGB
 		case 5 {$r = $v; $g = $p; $b = $q;}
 		}
 	}
+
+	return [$r, $g, $b];
 }
 
 #/* Create a contrasting color */
@@ -132,6 +134,8 @@ sub rgb_contrast
 		$v = VAL_MIN;
 
 	$r, $g, $b = Color::HSV2RGB($h, $s, $v);
+
+	return [$r, $b, $g];
 }
 
 sub min3
