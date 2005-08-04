@@ -47,21 +47,8 @@ $r->print(<<EOF);
 	<head>
 		<title>Wired XT3 Monitor</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-		<style type="text/css">
-			body {
-				font-family: Tahoma, sans-serif;
-			}
-
-			.micro {
-				font-size: 11px;
-				color: #002233;
-			}
-
-			img {
-				margin: 0px;
-				border: 0px;
-			}
-		</style>
+		<link rel="stylesheet" type="text/css" href="main.css" media="screen" />
+		<script type="text/javascript" src="main.js"></script>
 	</head>
 	<body>
 		<map name="nav" id="nav">
