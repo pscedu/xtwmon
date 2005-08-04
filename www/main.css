@@ -1,0 +1,15 @@
+/* $Id$ */
+
+body {
+	font-family: Tahoma, sans-serif;
+}
+
+.micro {
+	font-size: 11px;
+	color: #002233;
+}
+
+img {
+	margin: 0px;
+	border: 0px;
+}
