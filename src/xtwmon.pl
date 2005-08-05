@@ -1,8 +1,10 @@
 #!/usr/bin/perl
 # $Id$
 
+use lib qw(../lib);
 use GD;
 use POSIX;
+use XTWMon::Color;
 
 use strict;
 use warnings;
@@ -120,6 +122,8 @@ sub gen {
 		"XY Plane at Z=$pos"
 	);
 
+	my @names = qw(x y z);
+
 	my @xdim = (
 		[ DIM_Z, DIM_Y ],
 		[ DIM_X, DIM_Z ],
@@ -181,6 +185,15 @@ sub gen {
 	}
 	$img->setThickness(1);
 
+	my $planefn = "$out_dir/$names[$dim]$pos";
+	open PLANEFH, "> $planefn" or err($planefn);
+
+=cut
+	<map name="latest/map.htmlyz">
+	</map>
+=cut
+
+
 	for ($u = 0, $up = $upstart;
 	    $u < $max[$udim] + 1;
 	    $u++, $up += $uincr) {
@@ -205,23 +218,16 @@ sub gen {
 			cen($img, $node->{nid}, $up, $up + $node_w,
 			    $vp, $vp + $node_h, $col_black, 1);
 
-
-=cut
-		<map name="latest/map.html#xz">
-		</map>
-		<map name="latest/map.htmlxy">
-		</map>
-		<map name="latest/map.htmlyz">
-		</map>
-=cut
-
+			print PLANEFH "$$_x $$_y $$_z\n";
 		}
 	}
 
-	local *OUTFN;
-	open OUTFN, "> $fn" or err($fn);
-	print OUTFN $img->png;
-	close OUTFN;
+	local *OUTFH;
+	open OUTFH, "> $fn" or err($fn);
+	print OUTFH $img->png;
+	close OUTFH;
+
+	close PLANEFH;
 }
 
 sub err {
@@ -338,5 +344,16 @@ sub write_nodes {
 
 sub col_get {
 	my ($pos, $tot) = @_;
-	return [$pos/$tot*255, $pos/$tot*255, $pos/$tot*255];
+	my ($hinc, $vinc, $sinc);
+	my ($h, $s, $v);
+
+	$hinc = 360 / $tot;
+	$sinc = (SAT_MAX - SAT_MIN) / $tot;
+	$vinc = (VAL_MAX - VAL_MIN) / $tot;
+
+	$h = $hinc * $pos + HUE_MIN;
+	$s = $sinc * $pos + SAT_MIN;
+	$v = $vinc * $pos + VAL_MIN;
+
+	return XTWMon::Color::HSV2RGB($h, $s, $v);
 }
