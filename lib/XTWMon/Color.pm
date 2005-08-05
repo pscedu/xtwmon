@@ -3,7 +3,7 @@
 
 # Package to convert to/from RGB/HSV
 # and create contrasting colors
-package XTWMON::Color;
+package XTWMon::Color;
 
 use POSIX;
 use Exporter;
@@ -83,14 +83,14 @@ sub HSV2RGB
 {
 	my ($s, $h, $v) = @_;
 	my ($f, $p, $q, $t, $i);
+	my ($r, $g, $b);
 
 	if ($s == 0) {
 		$r = $v;
 		$g = $v;
 		$b = $v;
 	} else {
-		if ($h == 360)
-			$h = 0;
+		$h = 0 if $h == 360;
 		$h /= 60;
 
 		$i = floor($h);
@@ -113,30 +113,30 @@ sub HSV2RGB
 #/* Create a contrasting color */
 sub rgb_contrast
 {
-	my ($r, $g, $g) = @_;
+	my ($r, $g, $b) = @_;
 	my ($h, $s, $v);
 
-	$h, $s, $v = RGB2HSV($r, $g, $b);
+	($h, $s, $v) = RGB2HSV($r, $g, $b);
 
 	#/* Rotate 180 degrees */
 	$h -= 180;
-
-	if ($h < 0)
-		$h += 360;
+	$h += 360 if $h < 0;
 
 	#/* Sat should be [0.3-1.0] */
-	if ($s < mid(SAT_MAX, SAT_MIN))
+	if ($s < mid(SAT_MAX, SAT_MIN)){
 		$s = SAT_MAX;
-	else
+	} else {
 		$s = SAT_MIN;
+	}
 
 	#/* Val should be [0.5-1.0] */
-	if ($v < MID(VAL_MAX, VAL_MIN))
+	if ($v < MID(VAL_MAX, VAL_MIN)) {
 		$v = VAL_MAX;
-	else
+	} else {
 		$v = VAL_MIN;
+	}
 
-	$r, $g, $b = HSV2RGB($h, $s, $v);
+	($r, $g, $b) = HSV2RGB($h, $s, $v);
 
 	return [$r, $b, $g];
 }
