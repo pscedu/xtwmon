@@ -16,6 +16,9 @@ use constant _PATH_STDIN	=> "/dev/stdin";
 use constant _PATH_DISABLED	=> "/var/www/html/xtwmon/www/latest/disabled";
 use constant _PATH_FREE		=> "/var/www/html/xtwmon/www/latest/free";
 use constant _PATH_JOBPREFIX	=> "/var/www/html/xtwmon/www/latest/jid_";
+use constant _PATH_X		=> "/var/www/html/xtwmon/www/latest/x";
+use constant _PATH_Y		=> "/var/www/html/xtwmon/www/latest/y";
+use constant _PATH_Z		=> "/var/www/html/xtwmon/www/latest/z";
 
 use constant kTitle => "XT3 Wired View";
 
@@ -42,7 +45,7 @@ sub new {
 
 # Create a gnuplot file
 sub gnu_plot {
-	my ($obj, $rx, $rz, $sx, $sz) = @_;
+	my ($obj) = @_;
 	local (*IN, *OUT, *ERR);
 
 	my $title = kTitle;
@@ -52,7 +55,7 @@ sub gnu_plot {
 	    or $obj->err(_PATH_GNUPLOT);
 	print IN <<EOF;
 set terminal png small color picsize 500 300
-set view $rx, $rz, $sx, $sz
+set view $obj->{rx}, $obj->{rz}, $obj->{sx}, $obj->{sz}
 set xlabel "X"
 set ylabel "Y"
 set zlabel "Z"
@@ -70,10 +73,22 @@ EOF
 # create the list of files that should be passed
 # as arguments to gnuplot
 sub file_list {
+	my ($obj) = @_;
+
 	my @files = glob(_PATH_JOBPREFIX . "*");
 	my @labels = map { 'job ' . join '', /jid_(\d+)$/ } @files;
-	push(@files, _PATH_FREE),     push @labels, 'free'	if -e _PATH_FREE;
-	push(@files, _PATH_DISABLED), push @labels, 'disabled' if -e _PATH_DISABLED;
+
+	my ($x, $y, $z) = @$obj{qw(x y z)};
+	$x = 0 unless -e _PATH_X . $x;
+	$y = 0 unless -e _PATH_Y . $y;
+	$z = 0 unless -e _PATH_Z . $z;
+
+	push(@files, _PATH_FREE),     push(@labels, 'free')	if -e _PATH_FREE;
+	push(@files, _PATH_DISABLED), push(@labels, 'disabled')	if -e _PATH_DISABLED;
+	push(@files, _PATH_X . $x),   push(@labels, "x-plane");
+	push(@files, _PATH_Y . $y),   push(@labels, "y-plane");
+	push(@files, _PATH_Z . $z),   push(@labels, "z-plane");
+
 	my $files = "";
 	my $n;
 	for ($n = 0; $n < @files; $n++) {
@@ -94,9 +109,6 @@ sub main {
 	my ($obj) = shift;
 
 	$obj->{r}->content_type('image/png');
-	my ($rx, $rz, $sx, $sz) = (kRotX, kRotZ, kScalX, kScalZ);
-
-	# Run the plot
 	$obj->gnu_plot();
 }
 
