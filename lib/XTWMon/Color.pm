@@ -5,7 +5,6 @@
 # and create contrasting colors
 package XTWMon::Color;
 
-use POSIX;
 use Exporter;
 
 use strict;
@@ -26,8 +25,7 @@ use constant VAL_MAX => 1.0;
 # The following two mathematical algorithms were created from
 # pseudocode found in "Fundamentals of Interactive Computer Graphics".
 
-sub RGB2HSV
-{
+sub RGB2HSV {
 	my ($r, $g, $b) = @_;
 	my ($max, $min, $ran);
 	my ($rc, $gc, $bc);
@@ -40,48 +38,41 @@ sub RGB2HSV
 	$h = 0;
 	$s = 0;
 
-	#/* Value */
+	# Value
 	$v = $max;
 
-	#/* Saturation */
-	$s = $ran / $max if ($max != 0);
+	# Saturation
+	$s = $ran / $max if $max;
 
-	#/* Hue */
+	# Hue
 	if ($s != 0) {
-
-		#/* Measure color distances */
+		# Measure color distances
 		$rc = ($max - $r) / $ran;
 		$gc = ($max - $g) / $ran;
 		$bc = ($max - $b) / $ran;
 
-		#/* Between yellow and magenta */
 		if ($r == $max) {
+			# Between yellow and magenta
 			$h = $bc - $gc;
-		}
-		#/* Between cyan and yellow */
-		elsif ($g == $max) {
+		} elsif ($g == $max) {
+			# Between cyan and yellow
 			$h = 2 + $rc - $bc;
-		}
-		#/* Between magenta and cyan */
-		elsif ($b == $max) {
+		} elsif ($b == $max) {
+			# Between magenta and cyan
 			$h = 4 + $gc - $rc;
 		}
 
-		#/* Convert to degrees */
+		# Convert to degrees
 		$h *= 60;
-
-		if ($h < 0) {
-			$h += 360;
-		}
+		$h += 360 if $h < 0;
 	}
 
 	return [$h, $s, $v];
 }
 
 
-sub HSV2RGB
-{
-	my ($s, $h, $v) = @_;
+sub HSV2RGB {
+	my ($h, $s, $v) = @_;
 	my ($f, $p, $q, $t, $i);
 	my ($r, $g, $b);
 
@@ -93,7 +84,8 @@ sub HSV2RGB
 		$h = 0 if $h == 360;
 		$h /= 60;
 
-		$i = floor($h);
+		$i = int($h);
+
 		$f = $h - $i;
 		$p = $v * (1 - $s);
 		$q = $v * (1 - ($s * $f));
@@ -107,42 +99,29 @@ sub HSV2RGB
 		$r = $v, $g = $p, $b = $q if $i == 5;
 	}
 
-	return [$r, $g, $b];
+	return [int $r * 255, int $g * 255, int $b * 255];
 }
 
-#/* Create a contrasting color */
-sub rgb_contrast
-{
+# Create a contrasting color
+sub rgb_contrast {
 	my ($r, $g, $b) = @_;
-	my ($h, $s, $v);
 
-	($h, $s, $v) = RGB2HSV($r, $g, $b);
+	my ($h, $s, $v) = RGB2HSV($r, $g, $b);
 
-	#/* Rotate 180 degrees */
+	# Rotate 180 degrees
 	$h -= 180;
 	$h += 360 if $h < 0;
 
-	#/* Sat should be [0.3-1.0] */
-	if ($s < mid(SAT_MAX, SAT_MIN)){
-		$s = SAT_MAX;
-	} else {
-		$s = SAT_MIN;
-	}
+	# Sat should be [0.3,1.0]
+	$s = $s < mid(SAT_MAX, SAT_MIN) ? SAT_MAX : SAT_MIN;
 
 	#/* Val should be [0.5-1.0] */
-	if ($v < MID(VAL_MAX, VAL_MIN)) {
-		$v = VAL_MAX;
-	} else {
-		$v = VAL_MIN;
-	}
+	$v = $v < MID(VAL_MAX, VAL_MIN) ? VAL_MAX : VAL_MIN;
 
-	($r, $g, $b) = HSV2RGB($h, $s, $v);
-
-	return [$r, $b, $g];
+	return HSV2RGB($h, $s, $v);
 }
 
-sub min
-{
+sub min {
 	my $min = shift;
 	foreach (@_) {
 		$min = $_ if $_ < $min;
@@ -150,8 +129,7 @@ sub min
 	return $min;
 }
 
-sub max
-{
+sub max {
 	my $max = shift;
 	foreach (@_) {
 		$max = $_ if $_ > $max;
@@ -159,10 +137,9 @@ sub max
 	return $max;
 }
 
-sub mid
-{
+sub mid {
 	my ($max, $min) = @_;
-	return (($max + $min) / 2.0);
+	return (($max + $min) / 2);
 }
 
 1;
