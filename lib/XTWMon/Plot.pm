@@ -3,6 +3,7 @@
 
 package XTWMon::Plot;
 
+use XTWMon;
 use CGI;
 use IPC::Run;
 use strict;
@@ -11,14 +12,6 @@ use warnings;
 # Imporant files
 use constant _PATH_GNUPLOT	=> "/usr/bin/gnuplot";
 use constant _PATH_STDIN	=> "/dev/stdin";
-
-# Must be absolute, since mod_perl puts you in strange places.
-use constant _PATH_DISABLED	=> "/var/www/html/xtwmon/www/latest/disabled";
-use constant _PATH_FREE		=> "/var/www/html/xtwmon/www/latest/free";
-use constant _PATH_JOBPREFIX	=> "/var/www/html/xtwmon/www/latest/jid_";
-use constant _PATH_X		=> "/var/www/html/xtwmon/www/latest/x";
-use constant _PATH_Y		=> "/var/www/html/xtwmon/www/latest/y";
-use constant _PATH_Z		=> "/var/www/html/xtwmon/www/latest/z";
 
 use constant kTitle => "XT3 Wired View";
 
@@ -29,10 +22,9 @@ use constant kScalX => 1;
 use constant kScalZ => 1;
 
 sub new {
-	my ($class, $r) = @_;
+	my ($class) = @_;
 	my $pkg = ref($class) || $class;
 	return bless {
-		r	=> $r,
 		rx	=> kRotX,
 		rz	=> kRotZ,
 		sx	=> kScalX,
@@ -103,13 +95,6 @@ sub err {
 	(my $progname = $0) =~ s!.*/!!;
 	warn "$progname: ", @_, ": $!\n";
 	exit 1;
-}
-
-sub main {
-	my ($obj) = shift;
-
-	$obj->{r}->content_type('image/png');
-	$obj->gnu_plot();
 }
 
 sub setview {
