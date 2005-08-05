@@ -1,6 +1,7 @@
 #!/usr/bin/perl -W
 # $Id$
 
+use XTWMon;
 use strict;
 use warnings;
 
@@ -20,6 +21,12 @@ $x = 0 unless $x =~ /^\d+$/ && $x < MAX_X;
 $y = 0 unless $y =~ /^\d+$/ && $y < MAX_Y;
 $z = 0 unless $z =~ /^\d+$/ && $z < MAX_Z;
 
+my $rx = $cgi->param("rx") || 0;
+my $rz = $cgi->param("rz") || 0;
+
+$rx = 0 unless $rx =~ /^\d+$/ && $rx <= 360;
+$rz = 0 unless $rz =~ /^\d+$/ && $rz <= 360;
+
 my $uri = $r->uri;
 
 my ($xn, $xp, $yn, $yp, $zn, $zp);
@@ -32,19 +39,13 @@ $yp = ($y - 1) % MAX_Y;
 $zp = ($z - 1) % MAX_Z;
 
 my %url_dir = (
-	forw	=> "$uri?x=$xn&amp;y=$y&amp;z=$z",
-	back	=> "$uri?x=$xp&amp;y=$y&amp;z=$z",
-	left	=> "$uri?x=$x&amp;y=$y&amp;z=$zp",
-	right	=> "$uri?x=$x&amp;y=$y&amp;z=$zn",
-	up		=> "$uri?x=$x&amp;y=$yn&amp;z=$z",
-	down	=> "$uri?x=$x&amp;y=$yp&amp;z=$z"
+	forw	=> "$uri?x=$xn&amp;y=$y&amp;z=$z&amp;rx=$rx&amp;rz=$rz",
+	back	=> "$uri?x=$xp&amp;y=$y&amp;z=$z&amp;rx=$rx&amp;rz=$rz",
+	left	=> "$uri?x=$x&amp;y=$y&amp;z=$zp&amp;rx=$rx&amp;rz=$rz",
+	right	=> "$uri?x=$x&amp;y=$y&amp;z=$zn&amp;rx=$rx&amp;rz=$rz",
+	up		=> "$uri?x=$x&amp;y=$yn&amp;z=$z&amp;rx=$rx&amp;rz=$rz",
+	down	=> "$uri?x=$x&amp;y=$yp&amp;z=$z&amp;rx=$rx&amp;rz=$rz"
 );
-
-my $rx = $cgi->param("rx") || 0;
-my $rz = $cgi->param("rz") || 0;
-
-$rx = 0 unless $rx =~ /^\d+$/ && $rx <= 360;
-$rz = 0 unless $rz =~ /^\d+$/ && $rz <= 360;
 
 my $rxp = ($rx - 2) % 360;
 my $rxn = ($rx + 2) % 360;
@@ -52,10 +53,10 @@ my $rzp = ($rz - 2) % 360;
 my $rzn = ($rz + 2) % 360;
 
 my %url_view = (
-	xincr	=> "$uri?rx=$rxn&amp;rz=$rz",
-	xdecr	=> "$uri?rx=$rxp&amp;rz=$rz",
-	zincr	=> "$uri?rx=$rx&amp;rz=$rzn",
-	zdecr	=> "$uri?rx=$rx&amp;rz=$rzp",
+	xincr	=> "$uri?rx=$rxn&amp;rz=$rz&amp;x=$x&amp;y=$y&amp;z=$z",
+	xdecr	=> "$uri?rx=$rxp&amp;rz=$rz&amp;x=$x&amp;y=$y&amp;z=$z",
+	zincr	=> "$uri?rx=$rx&amp;rz=$rzn&amp;x=$x&amp;y=$y&amp;z=$z",
+	zdecr	=> "$uri?rx=$rx&amp;rz=$rzp&amp;x=$x&amp;y=$y&amp;z=$z",
 );
 
 $r->print(<<EOF);
@@ -88,7 +89,7 @@ $r->print(<<EOF);
 				<td><img alt="[xz]" border="0" usemap="latest/map.html#xz"
 					 src="latest/y$y.png" /></td>
 				<td width="10"></td>
-				<td><img alt="[3d]" border="0" src="plot.pl?rx=$rx&amp;rz=$rz" /></td>
+				<td><img alt="[3d]" border="0" src="plot.pl?rx=$rx&amp;rz=$rz&amp;x=$x&amp;y=$y&amp;z=$z" /></td>
 			</tr>
 			<tr>
 				<td><img alt="[xy]" border="0" usemap="map.html#xy"
@@ -98,9 +99,24 @@ $r->print(<<EOF);
 					 src="latest/x$x.png" /></td>
 			</tr>
 			<tr>
-				<td colspan="3" align="right">
-					<img alt="[nav]" border="0" usemap="#nav" src="img/nav.png" />
-					<img alt="[view]" border="0" usemap="#view" src="img/sphere.png" /></td>
+				<td colspan="3">
+					<table border="0" cellspacing="0" cellpadding="0" width="100%">
+						<tr>
+							<td valign="top">
+EOF
+
+if (open FH, "< " . _PATH_JOBLEGEND) {
+	print <FH>;
+	close FN;
+}
+
+print <<EOF;
+</td>
+							<td align="right">
+								<img alt="[nav]" border="0" usemap="#nav" src="img/nav.png" />
+								<img alt="[view]" border="0" usemap="#view" src="img/sphere.png" /></td>
+							</tr>
+						</table></td>
 			</tr>
 		</table>
 		<div class="micro">Copyright &copy; 2005
