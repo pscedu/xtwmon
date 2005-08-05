@@ -4,6 +4,7 @@
 use lib qw(../lib);
 use GD;
 use POSIX;
+use XTWMon;
 use XTWMon::Color;
 
 use strict;
@@ -11,6 +12,7 @@ use warnings;
 
 use constant _PATH_WIMAP => "data/rtrtrace";
 use constant _PATH_JOBMAP => "data/nids_list_phantom";
+use constant _PATH_FONT => "/usr/X11R6/lib/X11/fonts/TTF/tahoma.ttf";
 
 use constant IMG_WIDTH => 500;
 use constant IMG_HEIGHT => 300;
@@ -29,8 +31,7 @@ use constant SLEEP_INTV => 5000;
 
 use constant ST_MTIME => 9;
 
-my $out_dir = "../www/latest";
-my $archive_tmpl = "../www/data-%Y-%m-%d-tm-%H-%M";
+my $out_dir = _PATH_LATEST;
 
 my @dimcol = (
 	"red",			# x
@@ -60,7 +61,7 @@ parse_wimap(\@max);
 for (;;) {
 	if (-d $out_dir) {
 		my $ts = (stat $out_dir)[ST_MTIME];
-		my $dst = strftime($archive_tmpl, localtime $ts);
+		my $dst = strftime(_PATH_ARCHIVE, localtime $ts);
 		rename($out_dir, $dst) || err("rename: $out_dir to $dst");
 	}
 	mkdir $out_dir, 0755 || err("mkdir: $out_dir");
@@ -71,9 +72,9 @@ for (;;) {
 	gen(DIM_Y, $_, "$out_dir/y$_.png") foreach (0 .. $max[DIM_Y]);
 	gen(DIM_Z, $_, "$out_dir/z$_.png") foreach (0 .. $max[DIM_Z]);
 
-	write_jobfiles()	if %jobs;
-	write_nodes("$out_dir/free", \@freenodes)	if @freenodes;
-	write_nodes("$out_dir/disabled", \@disnodes)	if @disnodes;
+	write_jobfiles()			if %jobs;
+	write_nodes(_PATH_FREE, \@freenodes)	if @freenodes;
+	write_nodes(_PATH_DISABLED, \@disnodes)	if @disnodes;
 
 exit;
 	sleep(SLEEP_INTV);
@@ -85,7 +86,7 @@ sub cen {
 #	$img->string($fn, ($sx + $ex) / 2 - $fn->width * $len / 2,
 #	    $y + $fn->height, $str, $col);
 	my $d_img = GD::Image->new(100, 100);
-	my $fn = "/usr/X11R6/lib/X11/fonts/TTF/tahoma.ttf";
+	my $fn = _PATH_FONT;
 	my $sz = 8;
 	my @bnd = $d_img->stringFT($col, $fn, $sz, 0, 0, 50, $str);
 	my $ren_w = $bnd[2] - $bnd[0];
@@ -316,6 +317,7 @@ sub parse_jobmap {
 
 sub job_get {
 	my ($jobid) = shift;
+	return undef unless $jobid;
 	return $jobs{$jobid} if $jobs{$jobid};
 	$jobs{$jobid} = {
 		id => $jobid,
@@ -324,13 +326,31 @@ sub job_get {
 }
 
 sub write_jobfiles {
-	local *F;
 	my ($jobid, $job, $fn);
+	local *F;
+
+	$fn = _PATH_JOBLEGEND;
+	open F, "> $fn" or err($fn);
+	print F <<EOF;
+	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_FREE] }]});"></div>
+	Free<br />
+	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_DOWN] }]});"></div>
+	Disabled<br />
+EOF
+
 	while (($jobid, $job) = each %jobs) {
 		# XXX: sanity check?
 		$fn = "$out_dir/jid_$jobid";
 		write_nodes($fn, $job->{nodes});
+
+		my $col = join ',', @{ $job->{col} };
+		print F <<HTML;
+	<div class="job" style="background-color: rgb($col);"></div>
+	Job $jobid<br />
+HTML
 	}
+
+	close F;
 }
 
 sub write_nodes {
@@ -355,5 +375,5 @@ sub col_get {
 	$s = $sinc * $pos + SAT_MIN;
 	$v = $vinc * $pos + VAL_MIN;
 
-	return XTWMon::Color::HSV2RGB($h, $s, $v);
+	return (XTWMon::Color::HSV2RGB($h, $s, $v));
 }
