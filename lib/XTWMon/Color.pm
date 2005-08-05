@@ -31,6 +31,10 @@ sub RGB2HSV {
 	my ($rc, $gc, $bc);
 	my ($h, $s, $v);
 
+	$r /= 255;
+	$g /= 255;
+	$b /= 255;
+
 	$max = max($r, $g, $b);
 	$min = min($r, $g, $b);
 	$ran = $max - $min;
@@ -106,7 +110,7 @@ sub HSV2RGB {
 sub rgb_contrast {
 	my ($r, $g, $b) = @_;
 
-	my ($h, $s, $v) = RGB2HSV($r, $g, $b);
+	my ($h, $s, $v) = @{ RGB2HSV($r, $g, $b) };
 
 	# Rotate 180 degrees
 	$h -= 180;
@@ -115,8 +119,8 @@ sub rgb_contrast {
 	# Sat should be [0.3,1.0]
 	$s = $s < mid(SAT_MAX, SAT_MIN) ? SAT_MAX : SAT_MIN;
 
-	#/* Val should be [0.5-1.0] */
-	$v = $v < MID(VAL_MAX, VAL_MIN) ? VAL_MAX : VAL_MIN;
+	# Val should be [0.5,1.0]
+	$v = $v < mid(VAL_MAX, VAL_MIN) ? VAL_MAX : VAL_MIN;
 
 	return HSV2RGB($h, $s, $v);
 }
