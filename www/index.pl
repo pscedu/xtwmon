@@ -24,7 +24,7 @@ $z = 0 unless $z =~ /^\d+$/ && $z < MAX_Z;
 my $rx = $cgi->param("rx") || 0;
 my $rz = $cgi->param("rz") || 0;
 
-$rx = 0 unless $rx =~ /^\d+$/ && $rx <= 360;
+$rx = 0 unless $rx =~ /^\d+$/ && $rx <= 180;
 $rz = 0 unless $rz =~ /^\d+$/ && $rz <= 360;
 
 my $uri = $r->uri;
