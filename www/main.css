@@ -2,6 +2,7 @@
 
 body {
 	font-family: Tahoma, sans-serif;
+	font-size: 11px;
 }
 
 .micro {
@@ -12,4 +13,14 @@ body {
 img {
 	margin: 0px;
 	border: 0px;
+}
+
+.job {
+	width: 11px;
+	height: 11px;
+	border: 1px solid black;
+	float: left;
+	clear: both;
+	margin-top: 1px;
+	margin-right: 3px;
 }
