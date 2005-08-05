@@ -75,7 +75,7 @@ $r->print(<<EOF);
 			</tr>
 			<tr>
 				<td colspan="3" align="center">
-					<img alt="[nav]" border="0" usemap="#nav" src="nav.png" /></td>
+					<img alt="[nav]" border="0" usemap="#nav" src="img/nav.png" /></td>
 			</tr>
 		</table>
 		<div class="micro">Copyright &copy; 2005
