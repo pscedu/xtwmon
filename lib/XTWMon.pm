@@ -10,25 +10,36 @@ use warnings;
 our @ISA = qw(Exporter);
 
 our @EXPORT = qw(
-	_PATH_JOBPREFIX _PATH_JOBLEGEND
-	_PATH_DISABLED _PATH_FREE
-	_PATH_X _PATH_Y _PATH_Z
-	_PATH_LATEST _PATH_ARCHIVE
+	_PATH_LATEST _PATH_DISABLED _PATH_FREE
+	_PATH_JOB _PATH_DATA _PATH_IMG _PATH_IMGMAP
+	_PATH_LEGEND _PATH_ARCHIVE SKEL_DIRS
+	subst
 );
 
-# Must be absolute, since mod_perl puts you in strange places.
-use constant _PATH_DISABLED	=> "/var/www/html/xtwmon/www/latest/disabled";
-use constant _PATH_FREE		=> "/var/www/html/xtwmon/www/latest/free";
-use constant _PATH_JOBPREFIX	=> "/var/www/html/xtwmon/www/latest/jid_";
-use constant _PATH_X		=> "/var/www/html/xtwmon/www/latest/x";
-use constant _PATH_Y		=> "/var/www/html/xtwmon/www/latest/y";
-use constant _PATH_Z		=> "/var/www/html/xtwmon/www/latest/z";
-use constant _PATH_JOBLEGEND	=> "/var/www/html/xtwmon/www/latest/jobs.html";
-
 # Need trailing slash below.
-use constant _PATH_LATEST	=> "/var/www/html/xtwmon/www/latest/";
+use constant _PATH_LATEST	=> "/var/www/html/xtwmon/www/latest";
+
+# Must be absolute, since mod_perl puts you in strange places.
+use constant _PATH_DISABLED	=> _PATH_LATEST . "/disabled";
+use constant _PATH_FREE		=> _PATH_LATEST . "/free";
+use constant _PATH_JOB		=> _PATH_LATEST . "/jobs/%{id}";
+use constant _PATH_DATA		=> _PATH_LATEST . "/%{dim}/%{pos}";
+use constant _PATH_IMG		=> _PATH_LATEST . "/%{dim}/%{pos}.png";
+use constant _PATH_IMGMAP	=> _PATH_LATEST . "/maps/%{dim}%{pos}.html";
+use constant _PATH_LEGEND	=> _PATH_LATEST . "/legend.html";
+
+use constant SKEL_DIRS		=> [qw(x y z maps jobs)];
 
 # strftime(3)
-use constant _PATH_ARCHIVE	=> "/var/www/html/xtwmon/www/data-%Y-%m-%d-tm-%H-%M";
+use constant _PATH_ARCHIVE	=> "/var/www/html/xtwmon/www/data-%Y-%m-%d-tm-%H-%M-%S";
+
+sub subst {
+	my ($value, %subs) = @_;
+	my ($k, $v);
+	while (($k, $v) = each %subs) {
+		$value =~ s/%{$k}/$v/g;
+	}
+	return ($value);
+}
 
 1;

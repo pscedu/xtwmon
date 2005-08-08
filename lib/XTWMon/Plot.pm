@@ -20,7 +20,7 @@ use constant kRotX => 60;
 use constant kRotZ => 20;
 use constant kScalX => 1;
 use constant kScalZ => 1;
-
+ 
 sub new {
 	my ($class) = @_;
 	my $pkg = ref($class) || $class;
@@ -67,19 +67,19 @@ EOF
 sub file_list {
 	my ($obj) = @_;
 
-	my @files = glob(_PATH_JOBPREFIX . "*");
-	my @labels = map { 'job ' . join '', /jid_(\d+)$/ } @files;
+	my @files = glob(subst(_PATH_JOB, id => "*"));
+	my @labels = map { 'job ' . join '', m{/(\d+)$} } @files;
 
 	my ($x, $y, $z) = @$obj{qw(x y z)};
-	$x = 0 unless -e _PATH_X . $x;
-	$y = 0 unless -e _PATH_Y . $y;
-	$z = 0 unless -e _PATH_Z . $z;
+	$x = 0 unless -e subst(_PATH_DATA, dim => "x", pos => $x);
+	$y = 0 unless -e subst(_PATH_DATA, dim => "y", pos => $y);
+	$z = 0 unless -e subst(_PATH_DATA, dim => "z", pos => $z);
 
 	push(@files, _PATH_FREE),     push(@labels, 'free')	if -e _PATH_FREE;
 	push(@files, _PATH_DISABLED), push(@labels, 'disabled')	if -e _PATH_DISABLED;
-	push(@files, _PATH_X . $x),   push(@labels, "x-plane");
-	push(@files, _PATH_Y . $y),   push(@labels, "y-plane");
-	push(@files, _PATH_Z . $z),   push(@labels, "z-plane");
+	push(@files, subst(_PATH_DATA, dim => "x", pos => $x)),   push(@labels, "x-plane");
+	push(@files, subst(_PATH_DATA, dim => "y", pos => $y)),   push(@labels, "y-plane");
+	push(@files, subst(_PATH_DATA, dim => "z", pos => $z)),   push(@labels, "z-plane");
 
 	my $files = "";
 	my $n;
