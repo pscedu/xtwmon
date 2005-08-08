@@ -1,6 +1,7 @@
 #!/usr/bin/perl -W
 # $Id$
 
+use lib qw(../lib);
 use XTWMon;
 use strict;
 use warnings;
@@ -21,11 +22,11 @@ $x = 0 unless $x =~ /^\d+$/ && $x < MAX_X;
 $y = 0 unless $y =~ /^\d+$/ && $y < MAX_Y;
 $z = 0 unless $z =~ /^\d+$/ && $z < MAX_Z;
 
-my $rx = $cgi->param("rx") || 0;
-my $rz = $cgi->param("rz") || 0;
+my $rx = $cgi->param("rx");
+my $rz = $cgi->param("rz");
 
-$rx = 0 unless $rx =~ /^\d+$/ && $rx <= 180;
-$rz = 0 unless $rz =~ /^\d+$/ && $rz <= 360;
+$rx = 46 unless defined $rx && $rx =~ /^\d+$/ && $rx <= 180;
+$rz = 26 unless defined $rz && $rz =~ /^\d+$/ && $rz <= 360;
 
 my $uri = $r->uri;
 
@@ -84,19 +85,31 @@ $r->print(<<EOF);
 			<area href="$url_view{zincr}" shape="poly" alt="rotate z++" coords="104,46, 105,47, 106,48, 106,49, 106,50, 106,51, 106,52, 106,53, 106,54, 106,55, 106,56, 105,57, 105,58, 105,59, 105,60, 105,61, 105,62, 105,63, 105,64, 105,65, 104,66, 103,67, 102,67, 101,66, 100,65, 99,65, 98,66, 97,67, 96,67, 95,68, 94,68, 93,69, 92,69, 91,70, 90,70, 89,71, 88,71, 87,71, 86,71, 85,72, 84,72, 83,72, 82,71, 81,70, 81,69, 81,68, 81,67, 81,66, 81,65, 81,64, 81,63, 82,62, 83,61, 84,61, 85,61, 86,60, 87,60, 88,60, 89,59, 90,59, 91,58, 92,57, 92,56, 91,55, 90,54, 91,53, 92,52, 93,52, 94,51, 95,51, 96,50, 97,50, 98,49, 99,49, 100,48, 101,48, 102,47, 103,47" />
 			<area href="$url_view{zdecr}" shape="poly" alt="rotate z--" coords="23,46, 24,47, 25,47, 26,48, 27,48, 28,49, 29,49, 30,50, 31,50, 32,51, 33,51, 34,52, 35,52, 36,53, 37,54, 36,55, 35,56, 35,57, 36,58, 37,59, 38,59, 39,60, 40,60, 41,60, 42,61, 43,61, 44,61, 45,62, 46,63, 46,64, 46,65, 46,66, 46,67, 46,68, 46,69, 46,70, 45,71, 44,72, 43,72, 42,72, 41,71, 40,71, 39,71, 38,71, 37,70, 36,70, 35,69, 34,69, 33,68, 32,68, 31,67, 30,67, 29,66, 28,65, 27,65, 26,66, 25,67, 24,67, 23,66, 22,65, 22,64, 22,63, 22,62, 22,61, 22,60, 22,59, 22,58, 22,57, 21,56, 21,55, 21,54, 21,53, 21,52, 21,51, 21,50, 21,49, 21,48, 22,47" />
 		</map>
+EOF
+
+for (qw(x y z)) {
+	my $fh = XTWMon::subst(_PATH_IMGMAP, dim => $_,
+	    pos => {x=>$x, y=>$y, z=>$z}->{$_});
+	if (open FH, "< $fh") {
+		print <FH>;
+		close FN;
+	}
+}
+
+print <<EOF;
 		<table border="0" cellspacing="0" cellpadding="0">
 			<tr valign="middle">
-				<td><img alt="[xz]" border="0" usemap="latest/map.html#xz"
-					 src="latest/y$y.png" /></td>
+				<td><img alt="[xz]" border="0" usemap="mapy"
+					 src="latest/y/$y.png" /></td>
 				<td width="10"></td>
 				<td><img alt="[3d]" border="0" src="plot.pl?rx=$rx&amp;rz=$rz&amp;x=$x&amp;y=$y&amp;z=$z" /></td>
 			</tr>
 			<tr>
-				<td><img alt="[xy]" border="0" usemap="map.html#xy"
-					 src="latest/z$z.png" /></td>
+				<td><img alt="[xy]" border="0" usemap="mapz"
+					 src="latest/z/$z.png" /></td>
 				<td></td>
-				<td><img alt="[yz]" border="0" usemap="map.html#yz"
-					 src="latest/x$x.png" /></td>
+				<td><img alt="[yz]" border="0" usemap="mapx"
+					 src="latest/x/$x.png" /></td>
 			</tr>
 			<tr>
 				<td colspan="3">
@@ -105,7 +118,7 @@ $r->print(<<EOF);
 							<td valign="top">
 EOF
 
-if (open FH, "< " . _PATH_JOBLEGEND) {
+if (open FH, "< " . _PATH_LEGEND) {
 	print <FH>;
 	close FN;
 }
