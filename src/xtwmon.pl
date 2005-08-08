@@ -65,12 +65,15 @@ for (;;) {
 		rename($out_dir, $dst) || err("rename: $out_dir to $dst");
 	}
 	mkdir $out_dir, 0755 || err("mkdir: $out_dir");
+	foreach (@{ &SKEL_DIRS }) {
+		mkdir "$out_dir/$_", 0755 || err("mkdir: $out_dir/$_");
+	}
 
 	parse_jobmap();
 
-	gen(DIM_X, $_, "$out_dir/x$_.png") foreach (0 .. $max[DIM_X]);
-	gen(DIM_Y, $_, "$out_dir/y$_.png") foreach (0 .. $max[DIM_Y]);
-	gen(DIM_Z, $_, "$out_dir/z$_.png") foreach (0 .. $max[DIM_Z]);
+	gen(DIM_X, $_, subst(_PATH_IMG, dim => "x", pos => $_)) foreach (0 .. $max[DIM_X]);
+	gen(DIM_Y, $_, subst(_PATH_IMG, dim => "y", pos => $_)) foreach (0 .. $max[DIM_Y]);
+	gen(DIM_Z, $_, subst(_PATH_IMG, dim => "z", pos => $_)) foreach (0 .. $max[DIM_Z]);
 
 	write_jobfiles()			if %jobs;
 	write_nodes(_PATH_FREE, \@freenodes)	if @freenodes;
@@ -186,14 +189,13 @@ sub gen {
 	}
 	$img->setThickness(1);
 
-	my $planefn = "$out_dir/$names[$dim]$pos";
+	local (*PLANEFH, *MAPFH);
+	my $planefn = subst(_PATH_DATA, dim => $names[$dim], pos => $pos);
 	open PLANEFH, "> $planefn" or err($planefn);
 
-=cut
-	<map name="latest/map.htmlyz">
-	</map>
-=cut
-
+	my $mapfn = subst(_PATH_IMGMAP, dim => $names[$dim], pos => $pos);
+	open MAPFH, "> $mapfn" or err($mapfn);
+	print MAPFH qq(<map name="map$names[$dim]" id="map$names[$dim]">);
 
 	for ($u = 0, $up = $upstart;
 	    $u < $max[$udim] + 1;
@@ -203,25 +205,25 @@ sub gen {
 		    $v++, $vp += $vincr) {
 			my $node = $nodes[$$_x][$$_y][$$_z];
 			next unless $node;
-#			unless ($node) {
-#				$node = {
-#					nid => -1,
-#					col => $statecol[ST_UNAC]
-#				};
-#			}
+			my $upp = $up + $node_w;
+			my $vpp = $vp + $node_h;
 			my $col = $node->{col};
 			$col = $$col if ref $col eq "REF";
-			$img->filledRectangle($up, $vp,
-			    $up + $node_w, $vp + $node_h,
+			$img->filledRectangle($up, $vp, $upp, $vpp,
 			    $img->colorAllocate(@$col));
-			$img->rectangle($up, $vp,
-			    $up + $node_w, $vp + $node_h, $col_black);
-			cen($img, $node->{nid}, $up, $up + $node_w,
-			    $vp, $vp + $node_h, $col_black, 1);
+			$img->rectangle($up, $vp, $upp, $vpp, $col_black);
+			my $xcol = XTWMon::Color::rgb_contrast(@$col);
+			cen($img, $node->{nid}, $up, $upp, $vp, $vpp,
+			    $img->colorAllocate(@$xcol), 1);
 
 			print PLANEFH "$$_x $$_y $$_z\n";
+			printf MAPFH qq{<area href="%s" alt="nid %s" shape="rect" } .
+			    qq{coords="%d, %d, %d, %d" />\n}, $node->{nid},
+			    $node->{nid}, $up, $vp, $upp, $vpp;
 		}
 	}
+
+	print MAPFH "</map>";
 
 	local *OUTFH;
 	open OUTFH, "> $fn" or err($fn);
@@ -229,6 +231,7 @@ sub gen {
 	close OUTFH;
 
 	close PLANEFH;
+	close MAPFH;
 }
 
 sub err {
@@ -329,7 +332,7 @@ sub write_jobfiles {
 	my ($jobid, $job, $fn);
 	local *F;
 
-	$fn = _PATH_JOBLEGEND;
+	$fn = _PATH_LEGEND;
 	open F, "> $fn" or err($fn);
 	print F <<EOF;
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_FREE] }]});"></div>
@@ -340,7 +343,7 @@ EOF
 
 	while (($jobid, $job) = each %jobs) {
 		# XXX: sanity check?
-		$fn = "$out_dir/jid_$jobid";
+		$fn = subst(_PATH_JOB, id => $jobid);
 		write_nodes($fn, $job->{nodes});
 
 		my $col = join ',', @{ $job->{col} };
