@@ -1,19 +1,18 @@
 /* $Id$ */
 
+function report(o) {
+	var s = ''
+	for (var i in o)
+		s += i + ' '
+	alert(s)
+}
+
 function adj() {
 
 }
 
 function selnode(dim, nid, sx, sy, ex, ey) {
 	var e_img = getimg('img' + dim)
-
-/*
-var s = ''
-for (var i in img)
- s += i + ' ';
-alert(s)
-alert(img.parentNode.firstChild.name)
-*/
 
 	if (e_img && document.createElement) {
 		var e_cell = e_img.parentNode
