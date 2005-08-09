@@ -341,7 +341,7 @@ sub parse_qstat {
 			%j = (id => $1, state => "");
 		} elsif (/^\s*Job_Name = /) {
 			$j{name} = $';
-		} elsif (/^\s*Job_Owner = (.*?)@?/) {
+		} elsif (/^\s*Job_Owner = (.*?)@?/) { # XXX
 			$j{owner} = $';
 		} elsif (/^\s*job_state = (.)/) {
 			$j{state} = $1;
@@ -390,20 +390,25 @@ function _jinit() {
 	var j
 JS
 
+	my $n = 2;
+	my $max = scalar keys(%jobs) + 2;
 	while (($jobid, $job) = each %jobs) {
 		# XXX: sanity check?
 		$fn = subst(_PATH_JOB, id => $jobid);
 		write_nodes($fn, $job->{nodes});
 
+		print LEGENDF q{</td><td width="10%">} if $n == 1 + int $max / 2;
+
 		my $col = join ',', @{ $job->{col} };
 		print LEGENDF <<HTML;
 	<div class="job" style="background-color: rgb($col);"></div>
-	Job $jobid<br />
+	<a href="#" onclick="seljob($jobid); return false">Job $jobid</a><br />
 HTML
 		print JSF "\n\tj = new Job($jobid)\n";
 		foreach (qw(name owner queue dur_used dur_want ncpus mem)) {
 			print JSF "\tj.$_ = '$job->{$_}'\n" if exists $job->{$_};
 		}
+		$n++;
 	}
 	close LEGENDF;
 
