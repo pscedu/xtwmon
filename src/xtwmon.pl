@@ -12,6 +12,7 @@ use warnings;
 
 use constant _PATH_WIMAP => "data/rtrtrace";
 use constant _PATH_JOBMAP => "data/nids_list_phantom";
+use constant _PATH_QSTAT => "data/qstat.out";
 use constant _PATH_FONT => "/usr/X11R6/lib/X11/fonts/TTF/tahoma.ttf";
 
 use constant IMG_WIDTH => 500;
@@ -70,6 +71,7 @@ for (;;) {
 	}
 
 	parse_jobmap();
+	parse_qstat();
 
 	gen(DIM_X, $_, subst(_PATH_IMG, dim => "x", pos => $_)) foreach (0 .. $max[DIM_X]);
 	gen(DIM_Y, $_, subst(_PATH_IMG, dim => "y", pos => $_)) foreach (0 .. $max[DIM_Y]);
@@ -320,6 +322,44 @@ sub parse_jobmap {
 	}
 }
 
+sub parse_qstat {
+	local ($_, *QSTAT);
+	my $eof;
+
+	my %j = (state => "", id => 0);
+	open QSTAT, "< " . _PATH_QSTAT or err(_PATH_QSTAT);
+	for (;;) {
+		$eof = eof QSTAT;
+		defined($_ = <QSTAT>) && chomp;
+		if ($eof or /^Job Id: (\d+)/) {
+			# Save old job
+			if ($j{state} eq 'R' && exists $jobs{$j{id}}) {
+				@{ $jobs{$j{id}} }{keys %j} = values %j;
+			}
+			last if $eof;
+			# Set up next job
+			%j = (id => $1, state => "");
+		} elsif (/^\s*Job_Name = /) {
+			$j{name} = $';
+		} elsif (/^\s*Job_Owner = (.*?)@?/) {
+			$j{owner} = $';
+		} elsif (/^\s*job_state = (.)/) {
+			$j{state} = $1;
+		} elsif (/^\s*queue = /) {
+			$j{queue} = $';
+		} elsif (/^\s*Resource_List\.size = (\d+)/) {
+			$j{ncpus} = $1;
+		} elsif (/^\s*Resource_List\.walltime = (\d\d):(\d\d)/) {
+			$j{dur_want} = $1 * 60 + $2;
+		} elsif (/^\s*resources_used\.walltime = (\d\d):(\d\d)/) {
+			$j{dur_used} = $1 * 60 + $2;
+		} elsif (/^\s*resources_used\.mem = (\d+)kb/) {
+			$j{mem} = $1;
+		}
+	}
+	close QSTAT;
+}
+
 sub job_get {
 	my ($jobid) = shift;
 	return undef unless $jobid;
@@ -332,16 +372,23 @@ sub job_get {
 
 sub write_jobfiles {
 	my ($jobid, $job, $fn);
-	local *F;
+	local (*LEGENDF, *JSF);
 
 	$fn = _PATH_LEGEND;
-	open F, "> $fn" or err($fn);
-	print F <<EOF;
+	open LEGENDF, "> $fn" or err($fn);
+	print LEGENDF <<EOF;
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_FREE] }]});"></div>
 	Free<br />
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_DOWN] }]});"></div>
 	Disabled<br />
 EOF
+
+	$fn = _PATH_JOBJS;
+	open JSF, "> $fn" or err($fn);
+	print JSF <<JS;
+function _jinit() {
+	var j
+JS
 
 	while (($jobid, $job) = each %jobs) {
 		# XXX: sanity check?
@@ -349,13 +396,22 @@ EOF
 		write_nodes($fn, $job->{nodes});
 
 		my $col = join ',', @{ $job->{col} };
-		print F <<HTML;
+		print LEGENDF <<HTML;
 	<div class="job" style="background-color: rgb($col);"></div>
 	Job $jobid<br />
 HTML
+		print JSF "\n\tj = new Job($jobid)\n";
+		foreach (qw(name owner queue dur_used dur_want ncpus mem)) {
+			print JSF "\tj.$_ = '$job->{$_}'\n" if exists $job->{$_};
+		}
 	}
+	close LEGENDF;
 
-	close F;
+	print JSF <<JS;
+}
+_jinit()
+JS
+	close JSF;
 }
 
 sub write_nodes {
