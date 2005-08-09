@@ -43,6 +43,43 @@ function selnode(dim, nid, sx, sy, ex, ey) {
 		e_cell.appendChild(e_img)
 
 		selparent = e_cell
+
+		var pl = getobj('pl_node')
+		if (pl) {
+			pl.innerHTML = 'selected node ' + nid
+		}
+	}
+}
+
+function seljob(id) {
+	var j = invjmap[id]
+	var pl = getobj('pl_node')
+	if (j && pl) {
+		pl.innerHTML = '<b>Job Information</b><br />' +
+		    'ID: ' + j.id + '<br />' +
+		    (j.name  ? 'Name: '   + j.name  + '<br />' : '') +
+		    (j.owner ? 'Owner: '  + j.owner + '<br />' : '') +
+		    (j.queue ? 'Queue: '  + j.queue + '<br />' : '') +
+		    (j.ncpus ? 'NCPUS: '  + j.ncpus + '<br />' : '') +
+		    (j.mem   ? 'Memory: ' + j.mem   + 'KB<br />' : '')
+		if (j.dur_used && j.dur_want) {
+			var du_hr = parseInt(j.dur_used / 60)
+			var du_min = j.dur_used % 60
+			if (du_min < 10)
+				du_min = '0' + du_min
+
+			var dw_hr = parseInt(j.dur_want / 60)
+			var dw_min = j.dur_want % 60
+			if (dw_min < 10)
+				dw_min = '0' + dw_min
+
+			var prog = parseInt(100 * j.dur_used / j.dur_want)
+
+			pl.innerHTML += 'Time: ' +
+			    du_hr + ':' + du_min + '/' +
+			    dw_hr + ':' + dw_min +
+			    ' (' + prog + '%)'
+		}
 	}
 }
 
@@ -64,6 +101,7 @@ var jobs = []
 var invjmap = []
 
 function Job(id) {
+	this.id = id
 	jobs[jobs.length] = invjmap[id] = this
 	return (this)
 }
