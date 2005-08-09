@@ -69,6 +69,7 @@ $r->print(<<EOF);
 		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 		<link rel="stylesheet" type="text/css" href="main.css" media="screen" />
 		<script type="text/javascript" src="main.js"></script>
+		<script type="text/javascript" src="latest/jobs.js"></script>
 	</head>
 	<body>
 		<map name="nav" id="nav">
@@ -132,6 +133,7 @@ print <<EOF;
 						</table></td>
 			</tr>
 		</table>
+		<hr />
 		<div class="micro">Copyright &copy; 2005
 		  <a href="http://www.psc.edu/">Pittsburgh Supercomputing Center</a></div>
 	</body>
