@@ -100,16 +100,16 @@ print <<EOF;
 		<table border="0" cellspacing="0" cellpadding="0">
 			<tr valign="middle">
 				<td><img alt="[xz]" border="0" usemap="mapy"
-					 src="latest/y/$y.png" /></td>
+					 name="imgy" src="latest/y/$y.png" /></td>
 				<td width="10"></td>
 				<td><img alt="[3d]" border="0" src="plot.pl?rx=$rx&amp;rz=$rz&amp;x=$x&amp;y=$y&amp;z=$z" /></td>
 			</tr>
 			<tr>
 				<td><img alt="[xy]" border="0" usemap="mapz"
-					 src="latest/z/$z.png" /></td>
+					 name="imgz" src="latest/z/$z.png" /></td>
 				<td></td>
 				<td><img alt="[yz]" border="0" usemap="mapx"
-					 src="latest/x/$x.png" /></td>
+					 name="imgx" src="latest/x/$x.png" /></td>
 			</tr>
 			<tr>
 				<td colspan="3">
