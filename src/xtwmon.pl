@@ -217,9 +217,11 @@ sub gen {
 			    $img->colorAllocate(@$xcol), 1);
 
 			print PLANEFH "$$_x $$_y $$_z\n";
-			printf MAPFH qq{<area href="%s" alt="nid %s" shape="rect" } .
+			printf MAPFH qq{<area href="#" alt="[nid %d]" shape="rect" } .
+			    qq{onclick="selnode('%s', %d, %d, %d, %d, %d)" } .
 			    qq{coords="%d, %d, %d, %d" />\n}, $node->{nid},
-			    $node->{nid}, $up, $vp, $upp, $vpp;
+			    $names[$dim], $node->{nid}, $up, $vp, $upp, $vpp,
+			    $up, $vp, $upp, $vpp;
 		}
 	}
 
