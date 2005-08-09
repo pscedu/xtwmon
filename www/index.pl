@@ -116,7 +116,10 @@ print <<EOF;
 				<td colspan="3">
 					<table border="0" cellspacing="0" cellpadding="0" width="100%">
 						<tr>
-							<td valign="top">
+							<td valign="top" width="75%">
+								<table border="0" cellspacing="0" cellpadding="0" width="100%">
+									<tr valign="top">
+										<td width="10%">
 EOF
 
 if (open FH, "< " . _PATH_LEGEND) {
@@ -126,7 +129,10 @@ if (open FH, "< " . _PATH_LEGEND) {
 
 print <<EOF;
 </td>
-							<td align="right">
+										<td width="80%"><div id="pl_node"></div></td>
+									</tr>
+								</table></td>
+							<td align="right" width="25%">
 								<img alt="[nav]" border="0" usemap="#nav" src="img/nav.png" />
 								<img alt="[view]" border="0" usemap="#view" src="img/sphere.png" /></td>
 							</tr>
