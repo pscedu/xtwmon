@@ -24,3 +24,10 @@ img {
 	margin-top: 1px;
 	margin-right: 3px;
 }
+
+hr {
+	border: 0px;
+	border-top: 1px solid black;
+	height: 0px;
+	color: black;
+}
