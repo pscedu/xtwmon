@@ -11,7 +11,8 @@ our @ISA = qw(Exporter);
 
 our @EXPORT = qw(
 	_PATH_LATEST _PATH_DISABLED _PATH_FREE
-	_PATH_JOB _PATH_DATA _PATH_IMG _PATH_IMGMAP
+	_PATH_JOB _PATH_JOBJS _PATH_DATA
+	_PATH_IMG _PATH_IMGMAP
 	_PATH_LEGEND _PATH_ARCHIVE SKEL_DIRS
 	subst
 );
@@ -23,6 +24,7 @@ use constant _PATH_LATEST	=> "/var/www/html/xtwmon/www/latest";
 use constant _PATH_DISABLED	=> _PATH_LATEST . "/disabled";
 use constant _PATH_FREE		=> _PATH_LATEST . "/free";
 use constant _PATH_JOB		=> _PATH_LATEST . "/jobs/%{id}";
+use constant _PATH_JOBJS	=> _PATH_LATEST . "/jobs.js";
 use constant _PATH_DATA		=> _PATH_LATEST . "/%{dim}/%{pos}";
 use constant _PATH_IMG		=> _PATH_LATEST . "/%{dim}/%{pos}.png";
 use constant _PATH_IMGMAP	=> _PATH_LATEST . "/maps/%{dim}%{pos}.html";
