@@ -107,20 +107,46 @@ sub HSV2RGB {
 }
 
 # Create a contrasting color
+use constant ROT_DEG => 45;
+
+use constant SAT_SHIFT => 0.2;
+
+use constant CON_VAL_MAX => 0.85 * VAL_MAX;
+use constant CON_VAL_MIN => 0.4 * VAL_MIN;
+
+use constant CON_SAT_MAX => 0.6 * SAT_MAX;
+use constant CON_SAT_MIN => SAT_MIN;
+
 sub rgb_contrast {
 	my ($r, $g, $b) = @_;
 
 	my ($h, $s, $v) = @{ RGB2HSV($r, $g, $b) };
 
 	# Rotate 180 degrees
-	$h -= 180;
+	$h -= ROT_DEG;
 	$h += 360 if $h < 0;
 
-	# Sat should be [0.3,1.0]
-	$s = $s < mid(SAT_MAX, SAT_MIN) ? SAT_MAX : SAT_MIN;
+	# Saturation
+=cut
+	if ($s < CON_SAT_MAX) {
+		$s = SAT_MAX;
+	} else {
+		$s = CON_SAT_MIN;
+	}
+=cut
+#	$s = CON_SAT_MIN if($s > CON_SAT_MAX);
 
-	# Val should be [0.5,1.0]
-	$v = $v < mid(VAL_MAX, VAL_MIN) ? VAL_MAX : VAL_MIN;
+=cut
+	$s += SAT_SHIFT;
+	$s = 1.0 if $s > 1.0;
+=cut
+
+	# Value (Brightness)
+	if ($v < CON_VAL_MAX) {
+		$v = VAL_MAX;
+	} else {
+		$v = CON_VAL_MIN;
+	}
 
 	return HSV2RGB($h, $s, $v);
 }
