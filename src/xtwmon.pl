@@ -200,7 +200,6 @@ sub gen {
 	open MAPFH, "> $mapfn" or err($mapfn);
 	print MAPFH qq(<map name="map$names[$dim]" id="map$names[$dim]">);
 
-open FILE, ">> rgb_contrast";
 	for ($u = 0, $up = $upstart;
 	    $u < $max[$udim] + 1;
 	    $u++, $up += $uincr) {
@@ -213,14 +212,12 @@ open FILE, ">> rgb_contrast";
 			my $vpp = $vp + $node_h;
 			my $col = $node->{col};
 			$col = $$col if ref $col eq "REF";
-my $retval;
 			$img->filledRectangle($up, $vp, $upp, $vpp,
 			    col_lookup($img, \%ctab, @$col));
 			$img->rectangle($up, $vp, $upp, $vpp, $col_black);
 			my $xcol = XTWMon::Color::rgb_contrast(@$col);
 			cen($img, $node->{nid}, $up, $upp, $vp, $vpp,
 			    col_lookup($img, \%ctab, @$xcol), 1);
-
 			print PLANEFH "$$_x $$_y $$_z\n";
 			printf MAPFH qq{<area href="#" alt="[nid %d]" shape="rect" } .
 			    qq{onclick="selnode('%s', %d, %d, %d, %d, %d)" } .
@@ -229,7 +226,6 @@ my $retval;
 			    $up, $vp, $upp, $vpp;
 		}
 	}
-close FILE;
 
 	print MAPFH "</map>";
 
