@@ -9,7 +9,8 @@ use CGI;
 my $r = shift;
 my $cgi = CGI->new();
 
-my ($x, $y, $z, $rx, $rz, $sx, $sz);
+my ($job, $x, $y, $z, $rx, $rz, $sx, $sz);
+$job = $cgi->param("job");
 $x = $cgi->param("x");
 $y = $cgi->param("y");
 $z = $cgi->param("z");
@@ -21,5 +22,7 @@ $sz = $cgi->param("sz");
 my $p = XTWMon::Plot->new();
 $p->setpos($x, $y, $z);
 $p->setview($rx, $rz, $sx, $sz);
+$p->setjob($job) if $job;
+
 $r->content_type('image/png');
 $p->gnu_plot();
