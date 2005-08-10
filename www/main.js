@@ -78,9 +78,32 @@ function seljob(id) {
 			pl.innerHTML += 'Time: ' +
 			    du_hr + ':' + du_min + '/' +
 			    dw_hr + ':' + dw_min +
-			    ' (' + prog + '%)'
+			    ' (' + prog + '%)' + '<br />'
+
+			if (window.location.search.match(/[?&]job=(\d+)/) &&
+			    RegExp.$1 == id) {
+				pl.innerHTML += '<a href="' + make_url([]) + '">' +
+				    'Show all jobs</a>'
+			} else {
+				var up = []
+				up['job'] = id
+				pl.innerHTML += '<a href="' + make_url(up) + '">' +
+				    'Show only this job</a>'
+			}
 		}
 	}
+}
+
+function make_url(up) {
+	var s = window.location.search
+	/* XXX XXX XXX */
+	s = s.replace(/\bjob=[^&]*&?/, '')
+	for (var i in up) {
+		if (!s.match(/&$/))
+			s += '&'
+		s += i + '=' + up[i] /* XXX escape */
+	}
+	return (window.location.pathname + s)
 }
 
 function getobj(id) {
