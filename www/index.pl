@@ -28,8 +28,6 @@ my $rz = $cgi->param("rz");
 $rx = 46 unless defined $rx && $rx =~ /^\d+$/ && $rx <= 180;
 $rz = 26 unless defined $rz && $rz =~ /^\d+$/ && $rz <= 360;
 
-my $uri = $r->uri;
-
 my ($xn, $xp, $yn, $yp, $zn, $zp);
 $xn = ($x + 1) % MAX_X;
 $yn = ($y + 1) % MAX_Y;
@@ -40,12 +38,12 @@ $yp = ($y - 1) % MAX_Y;
 $zp = ($z - 1) % MAX_Z;
 
 my %url_dir = (
-	forw	=> "$uri?x=$xn&amp;y=$y&amp;z=$z&amp;rx=$rx&amp;rz=$rz",
-	back	=> "$uri?x=$xp&amp;y=$y&amp;z=$z&amp;rx=$rx&amp;rz=$rz",
-	left	=> "$uri?x=$x&amp;y=$y&amp;z=$zp&amp;rx=$rx&amp;rz=$rz",
-	right	=> "$uri?x=$x&amp;y=$y&amp;z=$zn&amp;rx=$rx&amp;rz=$rz",
-	up		=> "$uri?x=$x&amp;y=$yn&amp;z=$z&amp;rx=$rx&amp;rz=$rz",
-	down	=> "$uri?x=$x&amp;y=$yp&amp;z=$z&amp;rx=$rx&amp;rz=$rz"
+	forw	=> make_url($r, x => $xn),
+	back	=> make_url($r, x => $xp),
+	left	=> make_url($r, z => $zp),
+	right	=> make_url($r, z => $zn),
+	up		=> make_url($r, y => $yn),
+	down	=> make_url($r, y => $yp),
 );
 
 my $rxp = ($rx - 2) % 360;
@@ -54,11 +52,13 @@ my $rzp = ($rz - 2) % 360;
 my $rzn = ($rz + 2) % 360;
 
 my %url_view = (
-	xincr	=> "$uri?rx=$rxn&amp;rz=$rz&amp;x=$x&amp;y=$y&amp;z=$z",
-	xdecr	=> "$uri?rx=$rxp&amp;rz=$rz&amp;x=$x&amp;y=$y&amp;z=$z",
-	zincr	=> "$uri?rx=$rx&amp;rz=$rzn&amp;x=$x&amp;y=$y&amp;z=$z",
-	zdecr	=> "$uri?rx=$rx&amp;rz=$rzp&amp;x=$x&amp;y=$y&amp;z=$z",
+	xincr	=> make_url($r, rx => $rxn),
+	xdecr	=> make_url($r, rx => $rxp),
+	zincr	=> make_url($r, rz => $rzn),
+	zdecr	=> make_url($r, rz => $rzp),
 );
+
+my $job = $cgi->param('job');
 
 $r->print(<<EOF);
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN">
@@ -97,13 +97,16 @@ for (qw(x y z)) {
 	}
 }
 
+my $plot_url = "plot.pl?rx=$rx&amp;rz=$rz&amp;x=$x&amp;y=$y&amp;z=$z";
+$plot_url .= "&amp;job=$job" if $job;
+
 print <<EOF;
 		<table border="0" cellspacing="0" cellpadding="0">
 			<tr valign="middle">
 				<td><img alt="[xz]" border="0" usemap="mapy"
 					 name="imgy" src="latest/y/$y.png" /></td>
 				<td width="10"></td>
-				<td><img alt="[3d]" border="0" src="plot.pl?rx=$rx&amp;rz=$rz&amp;x=$x&amp;y=$y&amp;z=$z" /></td>
+				<td><img alt="[3d]" border="0" src="$plot_url" /></td>
 			</tr>
 			<tr>
 				<td><img alt="[xy]" border="0" usemap="mapz"
@@ -142,8 +145,41 @@ print <<EOF;
 		<hr />
 		<div class="micro">Copyright &copy; 2005
 		  <a href="http://www.psc.edu/">Pittsburgh Supercomputing Center</a></div>
+		<script type='text/javascript'><!--
+EOF
+
+print "seljob($job)\n" if $job;
+
+print <<EOF;
+		// -->
+		</script>
 	</body>
 </html>
 EOF
+
+sub make_url {
+	my ($r, %params) = @_;
+	my $url = $r->uri . "?";
+	my %v = (
+		x => $x,
+		y => $y,
+		z => $z,
+		rx => $rx,
+		rz => $rz,
+	);
+	foreach (keys %v) {
+		if (exists $params{$_}) {
+			$url .= "$_=$params{$_}&amp;";
+		} else {
+			$url .= "$_=$v{$_}&amp;";
+		}
+	}
+	if (exists $params{job}) {
+		$url .= "job=$params{job}&amp;"
+	} elsif ($job) {
+		$url .= "job=$job&amp;"
+	}
+	return ($url);
+}
 
 # vim: set ts=2:
