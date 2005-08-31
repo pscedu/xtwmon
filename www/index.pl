@@ -14,51 +14,55 @@ my $r = shift;
 $r->content_type('text/html');
 my $cgi = CGI->new();
 
-my $x = $cgi->param("x") || 0;
-my $y = $cgi->param("y") || 0;
-my $z = $cgi->param("z") || 0;
+my %p;
+$p{x} = $cgi->param("x") || 0;
+$p{y} = $cgi->param("y") || 0;
+$p{z} = $cgi->param("z") || 0;
 
-$x = 0 unless $x =~ /^\d+$/ && $x < MAX_X;
-$y = 0 unless $y =~ /^\d+$/ && $y < MAX_Y;
-$z = 0 unless $z =~ /^\d+$/ && $z < MAX_Z;
+$p{x} = 0 unless $p{x} =~ /^\d+$/ && $p{x} < MAX_X;
+$p{y} = 0 unless $p{y} =~ /^\d+$/ && $p{y} < MAX_Y;
+$p{z} = 0 unless $p{z} =~ /^\d+$/ && $p{z} < MAX_Z;
 
-my $rx = $cgi->param("rx");
-my $rz = $cgi->param("rz");
+$p{rx} = $cgi->param("rx");
+$p{rz} = $cgi->param("rz");
 
-$rx = 46 unless defined $rx && $rx =~ /^\d+$/ && $rx <= 180;
-$rz = 26 unless defined $rz && $rz =~ /^\d+$/ && $rz <= 360;
+$p{rx} = 46 unless defined $p{rx} && $p{rx} =~ /^\d+$/ && $p{rx} <= 180;
+$p{rz} = 26 unless defined $p{rz} && $p{rz} =~ /^\d+$/ && $p{rz} <= 360;
 
-my ($xn, $xp, $yn, $yp, $zn, $zp);
-$xn = ($x + 1) % MAX_X;
-$yn = ($y + 1) % MAX_Y;
-$zn = ($z + 1) % MAX_Z;
+my $xn = ($p{x} + 1) % MAX_X;
+my $yn = ($p{y} + 1) % MAX_Y;
+my $zn = ($p{z} + 1) % MAX_Z;
 
-$xp = ($x - 1) % MAX_X;
-$yp = ($y - 1) % MAX_Y;
-$zp = ($z - 1) % MAX_Z;
+my $xp = ($p{x} - 1) % MAX_X;
+my $yp = ($p{y} - 1) % MAX_Y;
+my $zp = ($p{z} - 1) % MAX_Z;
+
+my $rxp = ($p{rx} - 2) % 360;
+my $rxn = ($p{rx} + 2) % 360;
+my $rzp = ($p{rz} - 2) % 360;
+my $rzn = ($p{rz} + 2) % 360;
+
+$p{job} = $cgi->param('job');
+$p{job} = 0 unless $p{job} && $p{job} =~ /^\d+$/;
+
+# It is imperative that all variables affecting the URL
+# be set before make_url() is called.
 
 my %url_dir = (
-	forw	=> make_url($r, x => $xn),
-	back	=> make_url($r, x => $xp),
-	left	=> make_url($r, z => $zp),
-	right	=> make_url($r, z => $zn),
-	up		=> make_url($r, y => $yn),
-	down	=> make_url($r, y => $yp),
+	forw	=> make_url($r, \%p, x => $xn),
+	back	=> make_url($r, \%p, x => $xp),
+	left	=> make_url($r, \%p, z => $zp),
+	right	=> make_url($r, \%p, z => $zn),
+	up		=> make_url($r, \%p, y => $yn),
+	down	=> make_url($r, \%p, y => $yp),
 );
-
-my $rxp = ($rx - 2) % 360;
-my $rxn = ($rx + 2) % 360;
-my $rzp = ($rz - 2) % 360;
-my $rzn = ($rz + 2) % 360;
 
 my %url_view = (
-	xincr	=> make_url($r, rx => $rxn),
-	xdecr	=> make_url($r, rx => $rxp),
-	zincr	=> make_url($r, rz => $rzn),
-	zdecr	=> make_url($r, rz => $rzp),
+	xincr	=> make_url($r, \%p, rx => $rxn),
+	xdecr	=> make_url($r, \%p, rx => $rxp),
+	zincr	=> make_url($r, \%p, rz => $rzn),
+	zdecr	=> make_url($r, \%p, rz => $rzp),
 );
-
-my $job = $cgi->param('job');
 
 $r->print(<<EOF);
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN">
@@ -90,30 +94,30 @@ EOF
 
 for (qw(x y z)) {
 	my $fh = XTWMon::subst(_PATH_IMGMAP, dim => $_,
-	    pos => {x=>$x, y=>$y, z=>$z}->{$_});
+	    pos => $p{$_});
 	if (open FH, "< $fh") {
 		print <FH>;
 		close FN;
 	}
 }
 
-my $plot_url = "plot.pl?rx=$rx&amp;rz=$rz&amp;x=$x&amp;y=$y&amp;z=$z";
-$plot_url .= "&amp;job=$job" if $job;
+my $plot_url = "plot.pl?rx=$p{rx}&amp;rz=$p{rz}&amp;x=$p{x}&amp;y=$p{y}&amp;z=$p{z}";
+$plot_url .= "&amp;job=$p{job}" if $p{job};
 
 print <<EOF;
 		<table border="0" cellspacing="0" cellpadding="0">
 			<tr valign="middle">
 				<td><img alt="[xz]" border="0" usemap="mapy"
-					 name="imgy" src="latest/y/$y.png" /></td>
+					 name="imgy" src="latest/y/$p{y}.png" /></td>
 				<td width="10"></td>
 				<td><img alt="[3d]" border="0" src="$plot_url" /></td>
 			</tr>
 			<tr>
 				<td><img alt="[xy]" border="0" usemap="mapz"
-					 name="imgz" src="latest/z/$z.png" /></td>
+					 name="imgz" src="latest/z/$p{z}.png" /></td>
 				<td></td>
 				<td><img alt="[yz]" border="0" usemap="mapx"
-					 name="imgx" src="latest/x/$x.png" /></td>
+					 name="imgx" src="latest/x/$p{x}.png" /></td>
 			</tr>
 			<tr>
 				<td colspan="3">
@@ -148,7 +152,7 @@ print <<EOF;
 		<script type='text/javascript'><!--
 EOF
 
-print "seljob($job)\n" if $job;
+print "seljob($p{job})\n" if $p{job};
 
 print <<EOF;
 		// -->
@@ -158,26 +162,14 @@ print <<EOF;
 EOF
 
 sub make_url {
-	my ($r, %params) = @_;
+	my ($r, $rp, %params) = @_;
 	my $url = $r->uri . "?";
-	my %v = (
-		x => $x,
-		y => $y,
-		z => $z,
-		rx => $rx,
-		rz => $rz,
-	);
-	foreach (keys %v) {
+	foreach (keys %$rp) {
 		if (exists $params{$_}) {
 			$url .= "$_=$params{$_}&amp;";
-		} else {
-			$url .= "$_=$v{$_}&amp;";
+		} elsif ($rp->{$_}) {
+			$url .= "$_=$rp->{$_}&amp;";
 		}
-	}
-	if (exists $params{job}) {
-		$url .= "job=$params{job}&amp;"
-	} elsif ($job) {
-		$url .= "job=$job&amp;"
 	}
 	return ($url);
 }
