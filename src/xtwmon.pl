@@ -35,9 +35,9 @@ use constant ST_MTIME => 9;
 my $out_dir = _PATH_LATEST;
 
 my @dimcol = (
-	"red",			# x
-	"green",		# y
-	"blue"			# z
+	"blue",			# x
+	"red",			# y
+	"green"			# z
 );
 
 my @statecol = (
