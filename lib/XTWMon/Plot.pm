@@ -66,18 +66,22 @@ sub err {
 	exit 1;
 }
 
+sub isfloat {
+	return (defined $_[0] && $_[0] =~ /^-?(?:\d+\.?\d*|\d*\.\d+)([eE]-?\d+)?$/);
+}
+
 sub setview {
 	my ($obj, $lx, $ly, $lz) = @_;
-	$obj->{lx} = $lx if defined $lx && $lx =~ /^\d+$/;
-	$obj->{ly} = $ly if defined $ly && $ly =~ /^\d+$/;
-	$obj->{lz} = $lz if defined $lz && $lz =~ /^\d+$/;
+	$obj->{lx} = $lx if isfloat($lx);
+	$obj->{ly} = $ly if isfloat($ly);
+	$obj->{lz} = $lz if isfloat($lz);
 }
 
 sub setpos {
 	my ($obj, $x, $y, $z) = @_;
-	$obj->{x} = $x if defined $x && $x =~ /^\d+$/;
-	$obj->{y} = $y if defined $y && $y =~ /^\d+$/;
-	$obj->{z} = $z if defined $z && $z =~ /^\d+$/;
+	$obj->{x} = $x if isfloat($x);
+	$obj->{y} = $y if isfloat($y);
+	$obj->{z} = $z if isfloat($z);
 }
 
 sub setjob {
