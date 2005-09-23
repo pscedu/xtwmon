@@ -98,10 +98,12 @@ function make_url(up) {
 	var s = window.location.search
 	/* XXX XXX XXX */
 	s = s.replace(/\bjob=[^&]*&?/, '')
+	if (s == '')
+		s += '?'
+	else if (!s.match(/&$/))
+		s += '&'
 	for (var i in up) {
-		if (!s.match(/&$/))
-			s += '&'
-		s += i + '=' + up[i] /* XXX escape */
+		s += i + '=' + up[i] + '&' /* XXX escape */
 	}
 	return (window.location.pathname + s)
 }
@@ -127,4 +129,9 @@ function Job(id) {
 	this.id = id
 	jobs[jobs.length] = invjmap[id] = this
 	return (this)
+}
+
+function preload(imgsrc) {
+	if (document.images)
+		new Image().src = imgsrc
 }
