@@ -20,8 +20,8 @@ use constant DEF_LX =>   0.86;
 use constant DEF_LY =>  -0.24;
 use constant DEF_LZ =>  -0.45;
 
-use constant WIDTH => 500;
-use constant HEIGHT => 300;
+use constant WIDTH => 1000;
+use constant HEIGHT => 600;
 
 sub new {
 	my ($class) = @_;
@@ -44,6 +44,10 @@ sub print {
 		PeerPort => XT3D_PORT,
 		Proto => 'tcp') or $obj->err("socket");
 	my ($sw, $sh) = (WIDTH, HEIGHT);
+
+	my $jobdata = "";
+	$jobdata = "job: @{ $obj->{jobs} }" if @{ $obj->{jobs} };
+
 	print $s <<EOF;
 x: $obj->{x}
 y: $obj->{y}
@@ -54,7 +58,10 @@ lz: $obj->{lz}
 sw: $sw
 sh: $sh
 vmode: wiredone
+$jobdata
 EOF
+use constant SHUT_WR => 1;
+	shutdown $s, SHUT_WR;
 	print <$s>;
 	close $s;
 }
