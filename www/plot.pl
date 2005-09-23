@@ -33,7 +33,7 @@ $phi += PHI_SHIFT;
 $theta *= PI / 180;
 $phi *= PI / 180;
 
-my $rad = 80;
+my $rad = 120;
 my $x = $rad * cos($theta) * sin($phi);
 my $z = $rad * sin($theta) * sin($phi);
 my $y = $rad * cos($phi);
