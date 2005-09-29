@@ -42,7 +42,7 @@ my @dimcol = (
 
 my @statecol = (
 	[255, 255, 255],	# FREE
-	[0, 0, 0],		# DOWN
+	[168, 168, 168],	# DOWN
 	[0, 0, 0],		# USED
 	[255, 255, 0],		# SERV
 	[51, 51, 255],		# UNAC
@@ -314,7 +314,7 @@ sub parse_jobmap {
 	}
 	close JMAP;
 
-	my @keys = keys %jobs;
+	my @keys = sort { $a <=> $b } keys %jobs;
 	my $len = scalar @keys;
 	my $t = 0;
 	foreach my $j (@keys) {
@@ -381,6 +381,8 @@ sub write_jobfiles {
 	Free<br />
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_DOWN] }]});"></div>
 	Disabled<br />
+	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_SERV] }]});"></div>
+	Service<br />
 EOF
 
 	$fn = _PATH_JOBJS;
@@ -390,14 +392,16 @@ function _jinit() {
 	var j
 JS
 
-	my $n = 2;
+	my $n = 3;
 	my $max = scalar keys(%jobs) + 2;
-	while (($jobid, $job) = each %jobs) {
+	foreach $jobid (sort { $a <=> $b } keys %jobs) {
+		$job = $jobs{$jobid};
 		# XXX: sanity check?
 		$fn = subst(_PATH_JOB, id => $jobid);
 		write_nodes($fn, $job->{nodes});
 
-		print LEGENDF q{</td><td width="10%">} if $n == 1 + int $max / 2;
+		print LEGENDF q{</td><td width="10%">}
+		    if $n % (int(($max + 3) / 4)) == 0;
 
 		my $col = join ',', @{ $job->{col} };
 		print LEGENDF <<HTML;
