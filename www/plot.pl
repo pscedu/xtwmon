@@ -51,7 +51,7 @@ $lx /= $mag;
 $ly /= $mag;
 $lz /= $mag;
 
-my $p = XTWMon::Plot->new();
+my $p = XTWMon::Plot->new($r);
 $p->setpos($x, $y, $z);
 $p->setview($lx, $ly, $lz);
 $p->setjob($job);
