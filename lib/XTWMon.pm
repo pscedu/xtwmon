@@ -39,6 +39,7 @@ sub subst {
 	my ($value, %subs) = @_;
 	my ($k, $v);
 	while (($k, $v) = each %subs) {
+		warn "$k: no value set\n" unless defined $v;
 		$value =~ s/%{$k}/$v/g;
 	}
 	return ($value);
