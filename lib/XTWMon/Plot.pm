@@ -24,9 +24,10 @@ use constant WIDTH => 1000;
 use constant HEIGHT => 600;
 
 sub new {
-	my ($class) = @_;
+	my ($class, $req) = @_;
 	my $pkg = ref($class) || $class;
 	return bless {
+		r	=> $req,
 		x	=> DEF_X,
 		y	=> DEF_Y,
 		z	=> DEF_Z,
@@ -60,9 +61,15 @@ sh: $sh
 vmode: wiredone
 $jobdata
 EOF
-use constant SHUT_WR => 1;
-	shutdown $s, SHUT_WR;
-	print <$s>;
+	shutdown $s, 1; # SHUT_WR
+	my @data = <$s>;
+	my $bytes = 0;
+	local $_;
+	foreach (@data) {
+		$bytes += length;
+	}
+	$obj->{r}->set_content_length($bytes);
+	print @data;
 	close $s;
 }
 
