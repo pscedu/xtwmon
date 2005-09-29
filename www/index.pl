@@ -21,10 +21,10 @@ $p{p} = $cgi->param("p");
 $p{t} = 0 unless defined $p{t} && $p{t} =~ /^\d+$/;
 $p{p} = 0 unless defined $p{p} && $p{p} =~ /^\d+$/;
 
-my $tp = ($p{t} - 10) % 360;
-my $tn = ($p{t} + 10) % 360;
-my $pp = ($p{p} - 10) % 360;
-my $pn = ($p{p} + 10) % 360;
+my $tp = ($p{t} - 20) % 360;
+my $tn = ($p{t} + 20) % 360;
+my $pp = ($p{p} - 20) % 360;
+my $pn = ($p{p} + 20) % 360;
 
 # Bounds.
 $pp = 270 if $p{p} >= 270 && $pp < 270;
@@ -71,22 +71,14 @@ $r->print(<<EOF);
 		</map>
 EOF
 
-for (qw(x y z)) {
-	my $fh = XTWMon::subst(_PATH_IMGMAP, dim => $_,
-	    pos => $p{$_});
-	if (open FH, "< $fh") {
-		print <FH>;
-		close FN;
-	}
-}
-
 my $plot_url = make_url("plot.pl", \%p);
 
 print <<EOF;
 		<table border="0" cellspacing="0" cellpadding="0">
 			<tr>
-				<td colspan="4">
-				 <img alt="[3d]" border="0" src="$plot_url" width="1000" height="600" /></td>
+				<td colspan="5">
+				 <img alt="[3d]" border="0" src="$plot_url" width="1000"
+				  height="600" style="border: 1px solid white" /></td>
 			</tr>
 			<tr valign="top">
 				<td width="10%">
@@ -99,10 +91,10 @@ if (open FH, "< " . _PATH_LEGEND) {
 
 print <<EOF;
 </td>
-				<td width="30%">
-					<div id="pl_node"></div></td>
-				<td align="right" width="50%">
-					<img alt="[view]" border="0" usemap="#view" src="img/sphere.png" /></td>
+				<td width="60%" align="right">
+					<img alt="[view]" border="0" usemap="#view" src="img/sphere.png"
+					 align="right" style="padding: 1px; padding-left: 5px" />
+					<div id="pl_node" style="text-align: right"></div></td>
 			</tr>
 		</table>
 		<hr />
