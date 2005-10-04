@@ -15,6 +15,8 @@ our @EXPORT = qw(
 	_PATH_IMG _PATH_IMGMAP
 	_PATH_LEGEND _PATH_ARCHIVE SKEL_DIRS
 	subst
+
+	ZOOM_MIN ZOOM_MAX
 );
 
 # Need trailing slash below.
@@ -31,6 +33,9 @@ use constant _PATH_IMGMAP	=> _PATH_LATEST . "/maps/%{dim}%{pos}.html";
 use constant _PATH_LEGEND	=> _PATH_LATEST . "/legend.html";
 
 use constant SKEL_DIRS		=> [qw(x y z maps jobs)];
+
+use constant ZOOM_MAX		=> 100;
+use constant ZOOM_MIN		=> -100;
 
 # strftime(3)
 use constant _PATH_ARCHIVE	=> "/var/www/html/xtwmon/www/data-%Y-%m-%d-tm-%H-%M-%S";
