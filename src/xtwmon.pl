@@ -10,9 +10,9 @@ use XTWMon::Color;
 use strict;
 use warnings;
 
-use constant _PATH_WIMAP => "data/rtrtrace";
-use constant _PATH_JOBMAP => "data/nids_list_phantom";
-use constant _PATH_QSTAT => "data/qstat.out";
+use constant _PATH_WIMAP =>	"/home/yanovich/code/proj/xt3dmon/data/rtrtrace";
+use constant _PATH_JOBMAP =>	"/home/yanovich/code/proj/xt3dmon/data/nids_list_phantom";
+use constant _PATH_QSTAT =>	"/home/yanovich/code/proj/xt3dmon/data/qstat.out";
 use constant _PATH_FONT => "/usr/X11R6/lib/X11/fonts/TTF/tahoma.ttf";
 
 use constant IMG_WIDTH => 500;
