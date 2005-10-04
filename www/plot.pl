@@ -14,10 +14,14 @@ my $job = $cgi->param("job");
 my $theta = $cgi->param("t");
 my $phi = $cgi->param("p");
 my $zoom = $cgi->param("z");
+my $clicku = $cgi->param("clicku");
+my $clickv = $cgi->param("clickv");
 
-$theta = 0	unless defined $theta && $theta =~ /^\d+$/;
-$phi = 0	unless defined $phi   && $phi   =~ /^\d+$/;
-$zoom = 0	unless defined $zoom  && $zoom  =~ /^-?\d+$/;
+$theta = 0	unless defined $theta	&& $theta	=~ /^\d+$/;
+$phi = 0	unless defined $phi	&& $phi		=~ /^\d+$/;
+$zoom = 0	unless defined $zoom	&& $zoom	=~ /^-?\d+$/;
+$clicku = -1	unless defined $clicku	&& $clicku	=~ /^\d+$/;
+$clickv = -1	unless defined $clickv	&& $clickv	=~ /^\d+$/;
 
 use constant PI => 3.14159265358979323;
 
@@ -61,6 +65,7 @@ my $p = XTWMon::Plot->new($r);
 $p->setpos($x, $y, $z);
 $p->setview($lx, $ly, $lz);
 $p->setjob($job);
+$p->setclick($clicku, $clickv) if $clicku ne -1 and $clickv ne -1;
 
 $r->content_type('image/png');
 $p->print();
