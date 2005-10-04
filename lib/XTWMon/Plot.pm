@@ -20,8 +20,8 @@ use constant DEF_LX =>   0.86;
 use constant DEF_LY =>  -0.24;
 use constant DEF_LZ =>  -0.45;
 
-use constant WIDTH => 1000;
-use constant HEIGHT => 600;
+use constant WIDTH => 800;
+use constant HEIGHT => 450;
 
 sub new {
 	my ($class, $req) = @_;
@@ -69,6 +69,7 @@ EOF
 		$bytes += length;
 	}
 	$obj->{r}->set_content_length($bytes);
+	# $obj->{r}->set_last_modified(time() - 3600);
 	print @data;
 	close $s;
 }
