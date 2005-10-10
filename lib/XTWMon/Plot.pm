@@ -31,6 +31,8 @@ sub new {
 		x	=> DEF_X,
 		y	=> DEF_Y,
 		z	=> DEF_Z,
+		clicku	=> undef,
+		clickv	=> undef,
 		lx	=> DEF_LX,
 		ly	=> DEF_LY,
 		lz	=> DEF_LZ,
@@ -46,10 +48,7 @@ sub print {
 		Proto => 'tcp') or $obj->err("socket");
 	my ($sw, $sh) = (WIDTH, HEIGHT);
 
-	my $jobdata = "";
-	$jobdata = "job: @{ $obj->{jobs} }" if @{ $obj->{jobs} };
-
-	print $s <<EOF;
+	my $data = <<EOF;
 x: $obj->{x}
 y: $obj->{y}
 z: $obj->{z}
@@ -59,8 +58,13 @@ lz: $obj->{lz}
 sw: $sw
 sh: $sh
 vmode: wiredone
-$jobdata
 EOF
+
+	$data .= "job: @{ $obj->{jobs} }\n" if @{ $obj->{jobs} };
+	$data .= "clicku: $obj->{clicku}\n" if defined $obj->{clicku};
+	$data .= "clickv: $obj->{clickv}\n" if defined $obj->{clickv};
+
+	print $s $data;
 	shutdown $s, 1; # SHUT_WR
 	my @data = <$s>;
 	my $bytes = 0;
@@ -102,6 +106,12 @@ sub setpos {
 sub setjob {
 	my ($obj, $id) = @_;
 	push @{ $obj->{jobs} }, $id if defined $id && $id =~ /^\d+$/;
+}
+
+sub setclick {
+	my ($obj, $u, $v) = @_;
+	$obj->{clicku} = $u;
+	$obj->{clickv} = $v;
 }
 
 1;
