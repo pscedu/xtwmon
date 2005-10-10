@@ -27,7 +27,7 @@ img {
 .job {
 	width: 11px;
 	height: 11px;
-	border: 1px solid black;
+	border: 1px solid #333333;
 	float: left;
 	clear: both;
 	margin-top: 1px;
