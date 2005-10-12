@@ -33,6 +33,7 @@ sub new {
 		z	=> DEF_Z,
 		clicku	=> undef,
 		clickv	=> undef,
+		hl	=> undef,
 		lx	=> DEF_LX,
 		ly	=> DEF_LY,
 		lz	=> DEF_LZ,
@@ -61,6 +62,7 @@ vmode: wiredone
 EOF
 
 	$data .= "job: @{ $obj->{jobs} }\n" if @{ $obj->{jobs} };
+	$data .= "hl: $obj->{hl}\n" if $obj->{hl};
 	$data .= "clicku: $obj->{clicku}\n" if defined $obj->{clicku};
 	$data .= "clickv: $obj->{clickv}\n" if defined $obj->{clickv};
 
@@ -112,6 +114,11 @@ sub setclick {
 	my ($obj, $u, $v) = @_;
 	$obj->{clicku} = $u;
 	$obj->{clickv} = $v;
+}
+
+sub sethl {
+	my ($obj, $hl) = @_;
+	$obj->{hl} = $hl;
 }
 
 1;
