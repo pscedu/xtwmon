@@ -27,12 +27,9 @@ use constant _PATH_DISABLED	=> _PATH_LATEST . "/disabled";
 use constant _PATH_FREE		=> _PATH_LATEST . "/free";
 use constant _PATH_JOB		=> _PATH_LATEST . "/jobs/%{id}";
 use constant _PATH_JOBJS	=> _PATH_LATEST . "/jobs.js";
-use constant _PATH_DATA		=> _PATH_LATEST . "/%{dim}/%{pos}";
-use constant _PATH_IMG		=> _PATH_LATEST . "/%{dim}/%{pos}.png";
-use constant _PATH_IMGMAP	=> _PATH_LATEST . "/maps/%{dim}%{pos}.html";
 use constant _PATH_LEGEND	=> _PATH_LATEST . "/legend.html";
 
-use constant SKEL_DIRS		=> [qw(x y z maps jobs)];
+use constant SKEL_DIRS		=> [qw(jobs)];
 
 use constant ZOOM_MAX		=> 100;
 use constant ZOOM_MIN		=> -100;
