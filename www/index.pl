@@ -37,8 +37,8 @@ my $tp = ($p{t} - 30) % 360;
 my $tn = ($p{t} + 30) % 360;
 my $pp = ($p{p} - 30) % 360;
 my $pn = ($p{p} + 30) % 360;
-my $zp = $p{z} - 10;
-my $zn = $p{z} + 10;
+my $zp = $p{z} - 20;
+my $zn = $p{z} + 20;
 
 # Bounds.
 $pp = 270 if $p{p} >= 270 && $pp < 270;
