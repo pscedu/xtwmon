@@ -2,7 +2,6 @@
 # $Id$
 
 use lib qw(../lib);
-use GD;
 use POSIX;
 use XTWMon;
 use XTWMon::Color;
@@ -13,14 +12,6 @@ use warnings;
 use constant _PATH_WIMAP =>	"/home/yanovich/code/proj/xt3dmon/data/rtrtrace";
 use constant _PATH_JOBMAP =>	"/home/yanovich/code/proj/xt3dmon/data/nids_list_phantom";
 use constant _PATH_QSTAT =>	"/home/yanovich/code/proj/xt3dmon/data/qstat.out";
-use constant _PATH_FONT => "/usr/X11R6/lib/X11/fonts/TTF/tahoma.ttf";
-
-use constant IMG_WIDTH => 500;
-use constant IMG_HEIGHT => 300;
-
-use constant DIM_X => 0;
-use constant DIM_Y => 1;
-use constant DIM_Z => 2;
 
 use constant ST_FREE	=> 0;
 use constant ST_DOWN	=> 1;
@@ -34,12 +25,6 @@ use constant ST_MTIME => 9;
 
 my $out_dir = _PATH_LATEST;
 
-my @dimcol = (
-	"blue",			# x
-	"red",			# y
-	"green"			# z
-);
-
 my @statecol = (
 	[255, 255, 255],	# FREE
 	[168, 168, 168],	# DOWN
@@ -50,14 +35,13 @@ my @statecol = (
 
 # end config
 
-my @max;
 my @nodes;
 my @invmap;
 my %jobs;
 my @freenodes;
 my @disnodes;
 
-parse_wimap(\@max);
+parse_wimap();
 
 for (;;) {
 	if (-d $out_dir) {
@@ -73,10 +57,6 @@ for (;;) {
 	parse_jobmap();
 	parse_qstat();
 
-	gen(DIM_X, $_, subst(_PATH_IMG, dim => "x", pos => $_)) foreach (0 .. $max[DIM_X]);
-	gen(DIM_Y, $_, subst(_PATH_IMG, dim => "y", pos => $_)) foreach (0 .. $max[DIM_Y]);
-	gen(DIM_Z, $_, subst(_PATH_IMG, dim => "z", pos => $_)) foreach (0 .. $max[DIM_Z]);
-
 	write_jobfiles()			if %jobs;
 	write_nodes(_PATH_FREE, \@freenodes)	if @freenodes;
 	write_nodes(_PATH_DISABLED, \@disnodes)	if @disnodes;
@@ -85,169 +65,12 @@ exit;
 	sleep(SLEEP_INTV);
 }
 
-sub cen {
-	my ($img, $str, $sx, $ex, $sy, $ey, $col, $ceny) = @_;
-	my $len = length($str);
-#	$img->string($fn, ($sx + $ex) / 2 - $fn->width * $len / 2,
-#	    $y + $fn->height, $str, $col);
-	my $d_img = GD::Image->new(100, 100);
-	my $fn = _PATH_FONT;
-	my $sz = 8;
-	my @bnd = $d_img->stringFT($col, $fn, $sz, 0, 0, 50, $str);
-	my $ren_w = $bnd[2] - $bnd[0];
-	my $ren_h = $bnd[1] - $bnd[7];
-
-	my $y;
-	if ($ceny) {
-		$y = ($sy + $ey) / 2 + $ren_h / 2 - 1;
-	} else {
-		$y = $sy + $ren_h;
-	}
-
-	$img->stringFT($col, $fn, $sz, 0,
-	    ($sx + $ex) / 2 - $ren_w / 2 + 1, $y, $str);
-	return ($ren_w, $ren_h);
-}
-
-sub gen {
-	my ($dim, $pos, $fn) = @_;
-	my $img = GD::Image->new(IMG_WIDTH, IMG_HEIGHT);
-	my $col_white = $img->colorAllocate(255, 255, 255);
-	my $col_black = $img->colorAllocate(0, 0, 0);
-	my %ctab;
-	my %col = (
-		"red"	=> $img->colorAllocate(255, 0, 0),
-		"green"	=> $img->colorAllocate(0, 255, 0),
-		"blue"	=> $img->colorAllocate(0, 0, 255),
-		"white"	=> $col_white,
-		"black"	=> $col_black
-	);
-
-	my @labels = (
-		"YZ Plane at X=$pos",
-		"XZ Plane at Y=$pos",
-		"XY Plane at Z=$pos"
-	);
-
-	my @names = qw(x y z);
-
-	my @xdim = (
-		[ DIM_Z, DIM_Y ],
-		[ DIM_X, DIM_Z ],
-		[ DIM_X, DIM_Y ]
-	);
-
-	$img->fill(1, 1, $col{$dimcol[$dim]});
-	my ($used_w, $used_h) = cen($img, $labels[$dim], 0, IMG_WIDTH,
-	    0, 0, $col_black, 0);
-	$used_h += 2; # Text border
-
-	my ($udim, $vdim) = @{ $xdim[$dim] };
-
-	my $uincr = IMG_WIDTH / ($max[$udim] + 1);
-	my $vincr = (IMG_HEIGHT - $used_h) / ($max[$vdim] + 1);
-	my $node_w = $uincr - 3;
-	my $node_h = $vincr - 3;
-
-	my ($upstart, $vpstart);
-	$upstart = 0;
-	$vpstart = $used_h;
-
-	my ($u, $up, $v, $vp);
-	my ($_x, $_y, $_z);
-	if ($dim == DIM_X) {
-		$_x = \$pos;
-		$_y = \$v;
-		$_z = \$u;
-		$vincr *= -1;
-		$vpstart = IMG_HEIGHT + $vincr;
-	} elsif ($dim == DIM_Y) {
-		$_x = \$u;
-		$_y = \$pos;
-		$_z = \$v;
-	} elsif ($dim == DIM_Z) {
-		$_x = \$u;
-		$_y = \$v;
-		$_z = \$pos;
-		$vincr *= -1;
-		$vpstart = IMG_HEIGHT + $vincr; # - 1 ?
-	}
-
-	$img->setThickness(3);
-	# Draw V axes.
-	for ($u = 0, $up = $upstart;
-	    $u < $max[$udim] + 1;
-	    $u++, $up += $uincr) {
-		$img->line($up + $node_w/2, $used_h, $up + $node_w/2,
-		    IMG_HEIGHT - 2 - $node_h/2, $col{$dimcol[$vdim]});
-	}
-
-	# Draw U axes.
-	for ($v = 0, $vp = $vpstart;
-	    $v < $max[$vdim] + 1;
-	    $v++, $vp += $vincr) {
-		$img->line($upstart, $vp + $node_h/2,
-		    IMG_WIDTH - 2 - $node_w/2, $vp + $node_h/2,
-		    $col{$dimcol[$udim]});
-	}
-	$img->setThickness(1);
-
-	local (*PLANEFH, *MAPFH);
-	my $planefn = subst(_PATH_DATA, dim => $names[$dim], pos => $pos);
-	open PLANEFH, "> $planefn" or err($planefn);
-
-	my $mapfn = subst(_PATH_IMGMAP, dim => $names[$dim], pos => $pos);
-	open MAPFH, "> $mapfn" or err($mapfn);
-	print MAPFH qq(<map name="map$names[$dim]" id="map$names[$dim]">);
-
-	for ($u = 0, $up = $upstart;
-	    $u < $max[$udim] + 1;
-	    $u++, $up += $uincr) {
-		for ($v = 0, $vp = $vpstart;
-		    $v < $max[$vdim] + 1;
-		    $v++, $vp += $vincr) {
-			my $node = $nodes[$$_x][$$_y][$$_z];
-			next unless $node;
-			my $upp = $up + $node_w;
-			my $vpp = $vp + $node_h;
-			my $col = $node->{col};
-			$col = $$col if ref $col eq "REF";
-			$img->filledRectangle($up, $vp, $upp, $vpp,
-			    col_lookup($img, \%ctab, @$col));
-			$img->rectangle($up, $vp, $upp, $vpp, $col_black);
-			my $xcol = XTWMon::Color::rgb_contrast(@$col);
-			cen($img, $node->{nid}, $up, $upp, $vp, $vpp,
-			    col_lookup($img, \%ctab, @$xcol), 1);
-			print PLANEFH "$$_x $$_y $$_z\n";
-			printf MAPFH qq{<area href="#" alt="[nid %d]" shape="rect" } .
-			    qq{onclick="selnode('%s', %d, %d, %d, %d, %d)" } .
-			    qq{coords="%d, %d, %d, %d" />\n}, $node->{nid},
-			    $names[$dim], $node->{nid}, $up, $vp, $upp, $vpp,
-			    $up, $vp, $upp, $vpp;
-		}
-	}
-
-	print MAPFH "</map>";
-
-	local *OUTFH;
-	open OUTFH, "> $fn" or err($fn);
-	print OUTFH $img->png;
-	close OUTFH;
-
-	close PLANEFH;
-	close MAPFH;
-}
-
 sub err {
 	(my $progname = $0) =~ s!.*/!!;
 	die("$progname: $!: " . join('', @_) . "\n");
 }
 
 sub parse_wimap {
-	my ($max) = @_;
-
-	@$max = (0, 0, 0);
-
 	local ($_, *WIMAP);
 	open WIMAP, "< " . _PATH_WIMAP or err(_PATH_WIMAP);
 	while (<WIMAP>) {
@@ -275,9 +98,6 @@ sub parse_wimap {
 			y	=> $y,
 			z	=> $z
 		};
-		$max->[DIM_X] = $x if $x > $max->[DIM_X];
-		$max->[DIM_Y] = $y if $y > $max->[DIM_Y];
-		$max->[DIM_Z] = $z if $z > $max->[DIM_Z];
 	}
 	close WIMAP;
 }
