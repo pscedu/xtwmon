@@ -97,6 +97,7 @@ function seljob(id) {
 				    'Show all jobs</a>'
 			} else {
 				up['job'] = id
+				delete up['hl']
 				pl.innerHTML += '<a href="' +
 				    make_url(url, up) + '">' +
 				    'Show only this job</a>'
