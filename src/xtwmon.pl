@@ -221,7 +221,7 @@ JS
 		write_nodes($fn, $job->{nodes});
 
 		print LEGENDF q{</td><td width="10%">}
-		    if $n % (int(($max + 3) / 3)) == 0;
+		    if $n % int($max / 3) == 0;
 
 		my $col = join ',', @{ $job->{col} };
 		print LEGENDF <<HTML;
