@@ -378,11 +378,11 @@ sub write_jobfiles {
 	open LEGENDF, "> $fn" or err($fn);
 	print LEGENDF <<EOF;
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_FREE] }]});"></div>
-	Free<br />
+	<a href="#" onclick="selhl('free'); return false">Free</a><br />
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_DOWN] }]});"></div>
-	Disabled<br />
+	<a href="#" onclick="selhl('down'); return false">Down (PBS)</a><br />
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_SERV] }]});"></div>
-	Service<br />
+	<a href="#" onclick="selhl('service'); return false">Service</a><br />
 EOF
 
 	$fn = _PATH_JOBJS;
