@@ -18,6 +18,7 @@ my %p;
 $p{t} = $cgi->param("t");
 $p{p} = $cgi->param("p");
 $p{z} = $cgi->param("z");
+$p{hl} = $cgi->param("hl");
 
 my ($clicku, $clickv) = (-1, -1);
 my $click = $cgi->param("click");
@@ -28,6 +29,9 @@ if ($click && $click =~ /^\?(\d+),(\d+)$/) {
 $p{t} = 315 unless defined $p{t} && $p{t} =~ /^\d+$/;
 $p{p} = 15 unless defined $p{p} && $p{p} =~ /^\d+$/;
 $p{z} = 0 unless defined $p{z} && $p{z} =~ /^-?\d+$/;
+delete $p{hl} unless defined $p{hl} && ($p{hl} eq "service" or
+																				$p{hl} eq "free" or
+																				$p{hl} eq "down");
 
 my $tp = ($p{t} - 30) % 360;
 my $tn = ($p{t} + 30) % 360;

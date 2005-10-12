@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 # $Id$
 
+use lib qw(..);
 use XTWMon;
 use XTWMon::Plot;
 use CGI;
@@ -16,12 +17,16 @@ my $phi = $cgi->param("p");
 my $zoom = $cgi->param("z");
 my $clicku = $cgi->param("clicku");
 my $clickv = $cgi->param("clickv");
+my $hl = $cgi->param("hl");
 
 $theta = 0	unless defined $theta	&& $theta	=~ /^\d+$/;
 $phi = 0	unless defined $phi	&& $phi		=~ /^\d+$/;
 $zoom = 0	unless defined $zoom	&& $zoom	=~ /^-?\d+$/;
 $clicku = -1	unless defined $clicku	&& $clicku	=~ /^\d+$/;
 $clickv = -1	unless defined $clickv	&& $clickv	=~ /^\d+$/;
+$hl = ""	unless defined $hl && ($hl eq "service" or
+					$hl eq "free" or
+					$hl eq "down");
 
 use constant PI => 3.14159265358979323;
 
@@ -66,6 +71,7 @@ $p->setpos($x, $y, $z);
 $p->setview($lx, $ly, $lz);
 $p->setjob($job);
 $p->setclick($clicku, $clickv) if $clicku ne -1 and $clickv ne -1;
+$p->sethl($hl) if $hl;
 
 $r->content_type('image/png');
 $p->print();
