@@ -51,6 +51,13 @@ function selnode(dim, nid, sx, sy, ex, ey) {
 	}
 }
 
+function selhl(grp) {
+	var up = url_getparams(window.location)
+	delete up['job']
+	up['hl'] = grp
+	window.location = make_url(window.location.pathname, up)
+}
+
 function seljob(id) {
 	var j = invjmap[id]
 	var pl = getobj('pl_node')
@@ -80,32 +87,47 @@ function seljob(id) {
 			    dw_hr + ':' + dw_min +
 			    ' (' + prog + '%)' + '<br />'
 
-			if (window.location.search.match(/[?&]job=(\d+)/) &&
-			    RegExp.$1 == id) {
-				pl.innerHTML += '<a href="' + make_url([]) + '">' +
+			var url = window.location.pathname
+			var up = url_getparams(window.location)
+			if (up['job'] != null &&
+			    up['job'] == id) {
+				delete up['job']
+				pl.innerHTML += '<a href="' +
+				    make_url(url, up) + '">' +
 				    'Show all jobs</a>'
 			} else {
-				var up = []
 				up['job'] = id
-				pl.innerHTML += '<a href="' + make_url(up) + '">' +
+				pl.innerHTML += '<a href="' +
+				    make_url(url, up) + '">' +
 				    'Show only this job</a>'
 			}
 		}
 	}
 }
 
-function make_url(up) {
-	var s = window.location.search
-	/* XXX XXX XXX */
-	s = s.replace(/\bjob=[^&]*&?/, '')
-	if (s == '')
-		s += '?'
-	else if (!s.match(/&$/))
-		s += '&'
-	for (var i in up) {
-		s += i + '=' + up[i] + '&' /* XXX escape */
+function url_getparams(s) {
+	var search = ''
+	if (String(s).match(/\?(.*)/))
+		search = RegExp.$1
+	var parts = search.split(/&(amp;)?/)
+	var params = []
+	for (var i in parts) {
+		var cnps = parts[i].split(/=/, 2)
+		if (cnps.length == 2)
+			params[cnps[0]] = cnps[1]
 	}
-	return (window.location.pathname + s)
+	return (params)
+}
+
+function url_getbase(s) {
+	return (s.replace(/\?.*/, ''))
+}
+
+function make_url(s, up) {
+	s += '?'
+	for (var i in up)
+		s += i + '=' + up[i] + '&' /* XXX escape */
+	return (s)
 }
 
 function getobj(id) {
