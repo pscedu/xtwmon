@@ -190,20 +190,15 @@ sub job_get {
 	};
 }
 
+sub sepcols {
+	my ($pos, $incr) = @_;
+	return $pos == 0 || $pos % $incr ?
+	    "" : q{</td><td width="10%">};
+}
+
 sub write_jobfiles {
 	my ($jobid, $job, $fn);
 	local (*LEGENDF, *JSF);
-
-	$fn = _PATH_LEGEND;
-	open LEGENDF, "> $fn" or err($fn);
-	print LEGENDF <<EOF;
-	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_FREE] }]});"></div>
-	<a href="#" onclick="selhl('free'); return false">Free</a><br />
-	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_DOWN] }]});"></div>
-	<a href="#" onclick="selhl('down'); return false">Down (PBS)</a><br />
-	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_SERV] }]});"></div>
-	<a href="#" onclick="selhl('service'); return false">Service</a><br />
-EOF
 
 	$fn = _PATH_JOBJS;
 	open JSF, "> $fn" or err($fn);
@@ -212,16 +207,31 @@ function _jinit() {
 	var j
 JS
 
-	my $n = 3;
-	my $max = scalar keys(%jobs) + 2;
+	my $n = 3; # free, down, service
+	my $max = scalar(keys(%jobs)) + $n;
+	my $npercols = int($max / 3); # 4 columns (3+1)
+
+	$fn = _PATH_LEGEND;
+	open LEGENDF, "> $fn" or err($fn);
+	print LEGENDF <<EOF;
+	@{[sepcols(0, $npercols)]}
+	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_FREE] }]});"></div>
+	<a href="#" onclick="selhl('free'); return false">Free</a><br />
+	@{[sepcols(1, $npercols)]}
+	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_DOWN] }]});"></div>
+	<a href="#" onclick="selhl('down'); return false">Down (PBS)</a><br />
+	@{[sepcols(2, $npercols)]}
+	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_SERV] }]});"></div>
+	<a href="#" onclick="selhl('service'); return false">Service</a><br />
+EOF
+
 	foreach $jobid (sort { $a <=> $b } keys %jobs) {
 		$job = $jobs{$jobid};
 		# XXX: sanity check?
 		$fn = subst(_PATH_JOB, id => $jobid);
 		write_nodes($fn, $job->{nodes});
 
-		print LEGENDF q{</td><td width="10%">}
-		    if $n % int($max / 3) == 0;
+		print LEGENDF sepcols($n, $npercols);
 
 		my $col = join ',', @{ $job->{col} };
 		print LEGENDF <<HTML;
