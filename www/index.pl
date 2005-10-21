@@ -120,11 +120,13 @@ print <<EOF;
 </td>
 				<td width="60%" align="right">
 					<div style="float: right">
-						<img alt="[zoom]" border="0" usemap="#zoom" src="img/zoom.png"
+						<img alt="[temp]" border="0" src="img/temp.png" style="vertical-align: middle" 
+						 /><img alt="[jobs]" border="0" src="img/jobs.png" style="vertical-align: middle" 
+						 /><img alt="[zoom]" border="0" usemap="#zoom" src="img/zoom.png"
 						 style="vertical-align: middle" style="padding: 1px; padding-left: 5px"
 						 /><img alt="[view]" border="0" usemap="#view" src="img/sphere.png"
 						 style="vertical-align: middle; padding: 1px; padding-left: 5px" /></div>
-					<div id="pl_node" style="text-align: left; float: right"></div>
+					<div id="pl_node" style="text-align: left; float: right; clear: none"></div>
 					</td>
 			</tr>
 		</table>
