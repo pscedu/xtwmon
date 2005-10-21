@@ -27,7 +27,7 @@ my $out_dir = _PATH_LATEST;
 
 my @statecol = (
 	[255, 255, 255],	# FREE
-	[168, 168, 168],	# DOWN
+	[255, 0, 0],		# DOWN
 	[0, 0, 0],		# USED
 	[255, 255, 0],		# SERV
 	[51, 51, 255],		# UNAC
@@ -161,8 +161,9 @@ sub parse_qstat {
 			%j = (id => $1, state => "");
 		} elsif (/^\s*Job_Name = /) {
 			$j{name} = $';
-		} elsif (/^\s*Job_Owner = (.*?)@?/) { # XXX
+		} elsif (/^\s*Job_Owner = (.*?)/) { # XXX
 			$j{owner} = $';
+			$j{owner} =~ s/@.*//;
 		} elsif (/^\s*job_state = (.)/) {
 			$j{state} = $1;
 		} elsif (/^\s*queue = /) {
@@ -188,6 +189,18 @@ sub job_get {
 		id => $jobid,
 		nodes => []
 	};
+}
+
+# Arguments are the link text and Javascript code that
+# returns a URL.
+sub js_dynlink {
+	my ($desc, $js) = @_;
+	return	qq{<script type="text/javascript">				} .
+		qq{<!--\n							} .
+		qq{	document.write('<a href="' + $js + '">$desc</a>')	} .
+		qq{// -->							} .
+		qq{</script>							};
+EOF
 }
 
 sub sepcols {
@@ -216,13 +229,13 @@ JS
 	print LEGENDF <<EOF;
 	@{[sepcols(0, $npercols)]}
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_FREE] }]});"></div>
-	<a href="#" onclick="selhl('free'); return false">Free</a><br />
+	@{[js_dynlink("Free", "mkurl_hl('free')")]}<br />
 	@{[sepcols(1, $npercols)]}
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_DOWN] }]});"></div>
-	<a href="#" onclick="selhl('down'); return false">Down (PBS)</a><br />
+	@{[js_dynlink("Down (PBS)", "mkurl_hl('down')")]}<br />
 	@{[sepcols(2, $npercols)]}
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_SERV] }]});"></div>
-	<a href="#" onclick="selhl('service'); return false">Service</a><br />
+	@{[js_dynlink("Service", "mkurl_hl('service')")]}<br />
 EOF
 
 	foreach $jobid (sort { $a <=> $b } keys %jobs) {
@@ -236,7 +249,7 @@ EOF
 		my $col = join ',', @{ $job->{col} };
 		print LEGENDF <<HTML;
 	<div class="job" style="background-color: rgb($col);"></div>
-	<a href="#" onclick="seljob($jobid); return false">Job $jobid</a><br clear="all" />
+	@{[js_dynlink("Job $jobid", "mkurl_job($jobid)")]}<br clear="all" />
 HTML
 		print JSF "\n\tj = new Job($jobid)\n";
 		foreach (qw(name owner queue dur_used dur_want ncpus mem)) {
