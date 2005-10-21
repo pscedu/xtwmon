@@ -51,11 +51,18 @@ function selnode(dim, nid, sx, sy, ex, ey) {
 	}
 }
 
-function selhl(grp) {
+function mkurl_hl(grp) {
 	var up = url_getparams(window.location)
 	delete up['job']
 	up['hl'] = grp
-	window.location = make_url(window.location.pathname, up)
+	return (make_url(window.location.pathname, up))
+}
+
+function mkurl_job(id) {
+	var up = url_getparams(window.location)
+	up['job'] = id
+	delete up['hl']
+	return (make_url(window.location.pathname, up))
 }
 
 function seljob(id) {
@@ -86,22 +93,6 @@ function seljob(id) {
 			    du_hr + ':' + du_min + '/' +
 			    dw_hr + ':' + dw_min +
 			    ' (' + prog + '%)' + '<br />'
-
-			var url = window.location.pathname
-			var up = url_getparams(window.location)
-			if (up['job'] != null &&
-			    up['job'] == id) {
-				delete up['job']
-				pl.innerHTML += '<a href="' +
-				    make_url(url, up) + '">' +
-				    'Show all jobs</a>'
-			} else {
-				up['job'] = id
-				delete up['hl']
-				pl.innerHTML += '<a href="' +
-				    make_url(url, up) + '">' +
-				    'Show only this job</a>'
-			}
 		}
 	}
 }
