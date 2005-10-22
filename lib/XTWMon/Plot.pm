@@ -37,7 +37,10 @@ sub new {
 		lx	=> DEF_LX,
 		ly	=> DEF_LY,
 		lz	=> DEF_LZ,
-		jobs	=> []
+		jobs	=> [],
+		smode	=> undef,
+		vmode	=> undef,
+		sid	=> undef,
 	}, $pkg;
 }
 
@@ -58,13 +61,18 @@ ly: $obj->{ly}
 lz: $obj->{lz}
 sw: $sw
 sh: $sh
-vmode: wiredone
 EOF
 
-	$data .= "job: @{ $obj->{jobs} }\n" if @{ $obj->{jobs} };
-	$data .= "hl: $obj->{hl}\n" if $obj->{hl};
-	$data .= "clicku: $obj->{clicku}\n" if defined $obj->{clicku};
-	$data .= "clickv: $obj->{clickv}\n" if defined $obj->{clickv};
+	$data .= "job: @{ $obj->{jobs} }\n"	if @{ $obj->{jobs} };
+	$data .= "hl: $obj->{hl}\n"		if $obj->{hl};
+	$data .= "clicku: $obj->{clicku}\n"	if defined $obj->{clicku};
+	$data .= "clickv: $obj->{clickv}\n"	if defined $obj->{clickv};
+	$data .= "sid: $obj->{sid}\n"		if defined $obj->{sid};
+	$data .= "vmode: $obj->{vmode}\n"	if defined $obj->{vmode};
+	$data .= "smode: $obj->{smode}\n"	if defined $obj->{smode};
+
+warn "length: ", length($data), "\n";
+warn $data, "\n";
 
 	print $s $data;
 	shutdown $s, 1; # SHUT_WR
@@ -119,6 +127,21 @@ sub setclick {
 sub sethl {
 	my ($obj, $hl) = @_;
 	$obj->{hl} = $hl;
+}
+
+sub setsid {
+	my ($obj, $sid) = @_;
+	$obj->{sid} = $sid;
+}
+
+sub setvmode {
+	my ($obj, $vmode) = @_;
+	$obj->{vmode} = $vmode;
+}
+
+sub setsmode {
+	my ($obj, $smode) = @_;
+	$obj->{smode} = $smode;
 }
 
 1;
