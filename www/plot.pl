@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # $Id$
 
-use lib qw(..);
+use lib qw(../lib);
 use XTWMon;
 use XTWMon::Plot;
 use CGI;
@@ -18,15 +18,22 @@ my $zoom = $cgi->param("z");
 my $clicku = $cgi->param("clicku");
 my $clickv = $cgi->param("clickv");
 my $hl = $cgi->param("hl");
+my $sid = $cgi->param("sid");
+my $vmode = $cgi->param("vmode");
+my $smode = $cgi->param("smode");
 
 $theta = 0	unless defined $theta	&& $theta	=~ /^\d+$/;
 $phi = 0	unless defined $phi	&& $phi		=~ /^\d+$/;
 $zoom = 0	unless defined $zoom	&& $zoom	=~ /^-?\d+$/;
 $clicku = -1	unless defined $clicku	&& $clicku	=~ /^\d+$/;
 $clickv = -1	unless defined $clickv	&& $clickv	=~ /^\d+$/;
+$sid = ""	unless defined $sid	&& $sid		=~ /^[a-zA-Z0-9]+$/;
+$vmode = ""	unless defined $vmode	&& ($vmode eq "wiredone" or $vmode eq "physical");
+$smode = ""	unless defined $smode	&& ($smode eq "jobs" or $smode eq "temps");
 $hl = ""	unless defined $hl && ($hl eq "service" or
 					$hl eq "free" or
 					$hl eq "down");
+
 
 use constant PI => 3.14159265358979323;
 
@@ -72,6 +79,9 @@ $p->setview($lx, $ly, $lz);
 $p->setjob($job);
 $p->setclick($clicku, $clickv) if $clicku ne -1 and $clickv ne -1;
 $p->sethl($hl) if $hl;
+$p->setsid($sid) if $sid ne "";
+$p->setvmode($vmode) if $vmode;
+$p->setsmode($smode) if $smode;
 
 $r->content_type('image/png');
 $p->print();
