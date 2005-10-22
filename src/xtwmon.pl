@@ -5,13 +5,25 @@ use lib qw(../lib);
 use POSIX;
 use XTWMon;
 use XTWMon::Color;
+use File::Path;
+use File::Copy;
+use File::Find;
+use CGI;
 
 use strict;
 use warnings;
 
-use constant _PATH_WIMAP =>	"/home/yanovich/code/proj/xt3dmon/data/rtrtrace";
-use constant _PATH_JOBMAP =>	"/home/yanovich/code/proj/xt3dmon/data/nids_list_phantom";
-use constant _PATH_QSTAT =>	"/home/yanovich/code/proj/xt3dmon/data/qstat.out";
+use constant _PATH_WIMAP	=> "/home/yanovich/code/proj/xt3dmon/data/rtrtrace";
+use constant _PATH_JOBMAP	=> "/home/yanovich/code/proj/xt3dmon/data/nids_list_phantom";
+use constant _PATH_QSTAT	=> "/home/yanovich/code/proj/xt3dmon/data/qstat.out";
+
+use constant _PATH_LATEST	=> "/var/www/html/xtwmon/www/latest-tmp";
+use constant _PATH_LATEST_DUMMY	=> "/var/www/html/xtwmon/www/latest-old";
+
+use constant _PATH_JOBJS	=> _PATH_LATEST . "/jobs.js";
+use constant _PATH_LEGEND	=> _PATH_LATEST . "/legend.html";
+
+use constant SKEL_DIRS		=> [qw()];
 
 use constant ST_FREE	=> 0;
 use constant ST_DOWN	=> 1;
@@ -19,11 +31,10 @@ use constant ST_USED	=> 2;
 use constant ST_SERV	=> 3;
 use constant ST_UNAC	=> 4;
 
-use constant SLEEP_INTV => 5000;
-
 use constant ST_MTIME => 9;
 
 my $out_dir = _PATH_LATEST;
+my $cgi = CGI->new;
 
 my @statecol = (
 	[255, 255, 255],	# FREE
@@ -38,36 +49,30 @@ my @statecol = (
 my @nodes;
 my @invmap;
 my %jobs;
-my @freenodes;
 my @disnodes;
 
 parse_wimap();
 
-for (;;) {
-	if (-d $out_dir) {
-		my $ts = (stat $out_dir)[ST_MTIME];
-		my $dst = strftime(_PATH_ARCHIVE, localtime $ts);
-		rename($out_dir, $dst) || err("rename: $out_dir to $dst");
-	}
-	mkdir $out_dir, 0755 || err("mkdir: $out_dir");
-	foreach (@{ &SKEL_DIRS }) {
-		mkdir "$out_dir/$_", 0755 || err("mkdir: $out_dir/$_");
-	}
+mkdir $out_dir, 0755 || err("mkdir: $out_dir");
+foreach (@{ &SKEL_DIRS }) {
+	mkdir "$out_dir/$_", 0755 || err("mkdir: $out_dir/$_");
+}
 
-	parse_jobmap();
-	parse_qstat();
+parse_jobmap();
+parse_qstat();
 
-	write_jobfiles()			if %jobs;
-	write_nodes(_PATH_FREE, \@freenodes)	if @freenodes;
-	write_nodes(_PATH_DISABLED, \@disnodes)	if @disnodes;
+write_jobfiles()			if %jobs;
+
+# XXX: race
+rename(_PATH_LATEST_FINAL, _PATH_LATEST_DUMMY)	or err("rename final to dummy");
+rename(_PATH_LATEST, _PATH_LATEST_FINAL)	or err("rename tmp to final");
+rmtree(_PATH_LATEST_DUMMY, 0, 0);
 
 exit;
-	sleep(SLEEP_INTV);
-}
 
 sub err {
 	(my $progname = $0) =~ s!.*/!!;
-	die("$progname: $!: " . join('', @_) . "\n");
+	die("$progname: " . join('', @_) . ": $!\n");
 }
 
 sub parse_wimap {
@@ -129,7 +134,6 @@ sub parse_jobmap {
 			push @{ $j->{nodes} }, $node;
 		} else {
 			$node->{col} = $statecol[ST_FREE];
-			push @freenodes, $node;
 		}
 	}
 	close JMAP;
@@ -220,42 +224,37 @@ function _jinit() {
 	var j
 JS
 
-	my $n = 3; # free, down, service
-	my $max = scalar(keys(%jobs)) + $n;
-	my $npercols = int($max / 3); # 4 columns (3+1)
-
 	$fn = _PATH_LEGEND;
 	open LEGENDF, "> $fn" or err($fn);
 	print LEGENDF <<EOF;
-	@{[sepcols(0, $npercols)]}
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_FREE] }]});"></div>
 	@{[js_dynlink("Free", "mkurl_hl('free')")]}<br />
-	@{[sepcols(1, $npercols)]}
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_DOWN] }]});"></div>
 	@{[js_dynlink("Down (PBS)", "mkurl_hl('down')")]}<br />
-	@{[sepcols(2, $npercols)]}
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_SERV] }]});"></div>
 	@{[js_dynlink("Service", "mkurl_hl('service')")]}<br />
+	</td><td width="10%">
 EOF
+
+	my $n = 0; # free, down, service
+	my $max = scalar(keys(%jobs)) + $n;
+	my $npercols = int($max / 3 + .5); # 4 columns (3+1)
 
 	foreach $jobid (sort { $a <=> $b } keys %jobs) {
 		$job = $jobs{$jobid};
-		# XXX: sanity check?
-		$fn = subst(_PATH_JOB, id => $jobid);
-		write_nodes($fn, $job->{nodes});
 
-		print LEGENDF sepcols($n, $npercols);
+		print LEGENDF sepcols($n++, $npercols);
 
 		my $col = join ',', @{ $job->{col} };
+		# XXX: owner name and JS characters
 		print LEGENDF <<HTML;
 	<div class="job" style="background-color: rgb($col);"></div>
-	@{[js_dynlink("Job $jobid", "mkurl_job($jobid)")]}<br clear="all" />
+	@{[js_dynlink($cgi->escapeHTML($job->{owner}), "mkurl_job($jobid)")]}<br clear="all" />
 HTML
 		print JSF "\n\tj = new Job($jobid)\n";
 		foreach (qw(name owner queue dur_used dur_want ncpus mem)) {
 			print JSF "\tj.$_ = '$job->{$_}'\n" if exists $job->{$_};
 		}
-		$n++;
 	}
 	close LEGENDF;
 
