@@ -49,7 +49,6 @@ sub new {
 	}, $class;
 }
 
-
 sub getpath {
 	my ($obj, $res, $rel) = @_;
 	$rel = REL_SYSROOT unless defined $rel;
@@ -87,7 +86,7 @@ sub sid_gen {
 
 sub sid_valid {
 	my ($sid) = @_;
-	return (defined $sid && $sid =~ /^[a-zA-Z0-9]$/ &&
+	return (defined $sid && $sid =~ /^[a-zA-Z0-9]+$/ &&
 	    -d _PATH_CLI_ROOT . "/$sid");
 }
 
