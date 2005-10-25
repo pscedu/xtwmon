@@ -238,7 +238,7 @@ EOF
 
 	my $n = 0; # free, down, service
 	my $max = scalar(keys(%jobs)) + $n;
-	my $npercols = int($max / 3 + .5); # 4 columns (3+1)
+	my $npercols = int($max / 2 + .5); # 3 columns (2+1)
 
 	foreach $jobid (sort { $a <=> $b } keys %jobs) {
 		$job = $jobs{$jobid};
