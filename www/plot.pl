@@ -29,7 +29,7 @@ $clicku = -1	unless defined $clicku	&& $clicku	=~ /^\d+$/;
 $clickv = -1	unless defined $clickv	&& $clickv	=~ /^\d+$/;
 $sid = ""	unless defined $sid	&& $sid		=~ /^[a-zA-Z0-9]+$/;
 $vmode = ""	unless defined $vmode	&& ($vmode eq "wiredone" or $vmode eq "physical");
-$smode = ""	unless defined $smode	&& ($smode eq "jobs" or $smode eq "temps");
+$smode = ""	unless defined $smode	&& ($smode eq "jobs" or $smode eq "temp");
 $hl = ""	unless defined $hl && ($hl eq "service" or
 					$hl eq "free" or
 					$hl eq "down");
