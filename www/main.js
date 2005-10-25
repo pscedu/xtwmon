@@ -53,14 +53,16 @@ function selnode(dim, nid, sx, sy, ex, ey) {
 
 function mkurl_hl(grp) {
 	var up = url_getparams(window.location)
-	delete up['job']
 	up['hl'] = grp
+	up['smode'] = 'jobs'
+	delete up['job']
 	return (make_url(window.location.pathname, up))
 }
 
 function mkurl_job(id) {
 	var up = url_getparams(window.location)
 	up['job'] = id
+	up['smode'] = 'jobs'
 	delete up['hl']
 	return (make_url(window.location.pathname, up))
 }
