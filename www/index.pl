@@ -134,7 +134,7 @@ delete $p_smode{job};
 delete $p_smode{hl};
 
 my %p_reload = %p;
-delete $p{sid};
+delete $p_reload{sid};
 
 my %urls = (
 	temp	=> make_url($uri, \%p_smode, smode => "temp"),
