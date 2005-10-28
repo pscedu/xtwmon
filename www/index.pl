@@ -84,6 +84,12 @@ $r->print(<<EOF);
 		<title>Wired XT3 Monitor</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 		<link rel="stylesheet" type="text/css" href="main.css" media="screen" />
+		<script type="text/javascript">
+			<!--
+				var defparams = []
+				defparams['sid'] = '$p{sid}'
+			// -->
+		</script>
 		<script type="text/javascript" src="main.js"></script>
 		<script type="text/javascript" src="@{[$xtw->getpath(_GP_JOBJS, REL_WEBROOT)]}"></script>
 	</head>
