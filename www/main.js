@@ -104,7 +104,7 @@ function url_getparams(s) {
 	if (String(s).match(/\?(.*)/))
 		search = RegExp.$1
 	var parts = search.split(/&(amp;)?/)
-	var params = []
+	var params = defparams
 	for (var i in parts) {
 		var cnps = parts[i].split(/=/, 2)
 		if (cnps.length == 2)
