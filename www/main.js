@@ -96,6 +96,7 @@ function seljob(id) {
 			    dw_hr + ':' + dw_min +
 			    ' (' + prog + '%)' + '<br />'
 		}
+		pl.innerHTML += '<br />'
 	}
 }
 
