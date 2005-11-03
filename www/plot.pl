@@ -63,10 +63,16 @@ my $lx = -$x;
 my $ly = -$y;
 my $lz = -$z;
 
-# This is the center of the wired view.
-$x += 20;
-$y += 22;
-$z += 30;
+# Center of the view.
+if ($vmode eq "physical") {
+	$x += 58.075;
+	$y += 4.7;
+	$z += 6.4;
+} else {
+	$x += 20;
+	$y += 22;
+	$z += 30;
+}
 
 my $mag = sqrt($lx**2 + $ly**2 + $lz**2);
 $lx /= $mag;
@@ -83,5 +89,6 @@ $p->setsid($sid) if $sid ne "";
 $p->setvmode($vmode) if $vmode;
 $p->setsmode($smode) if $smode;
 
+$r->no_cache(1);
 $r->content_type('image/png');
 $p->print();
