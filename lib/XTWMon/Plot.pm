@@ -21,7 +21,7 @@ use constant DEF_LY =>  -0.24;
 use constant DEF_LZ =>  -0.45;
 
 use constant WIDTH => 800;
-use constant HEIGHT => 450;
+use constant HEIGHT => 600;
 
 sub new {
 	my ($class, $req) = @_;
