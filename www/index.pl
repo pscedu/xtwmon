@@ -41,8 +41,8 @@ $p{smode} = "jobs" unless defined $p{smode} && ($p{smode} eq "temp" or $p{vmode}
 
 my $tp = ($p{t} - 30) % 360;
 my $tn = ($p{t} + 30) % 360;
-my $pp = ($p{p} - 30) % 360;
-my $pn = ($p{p} + 30) % 360;
+my $pp = ($p{p} - 20) % 360;
+my $pn = ($p{p} + 20) % 360;
 my $zp = $p{z} - 20;
 my $zn = $p{z} + 20;
 
@@ -95,8 +95,8 @@ $r->print(<<EOF);
 	</head>
 	<body>
 		<map name="zoom">
-			<area href="$url_view{forw}" shape="rect" alt="zoom in" coords="0,35,71,71" />
-			<area href="$url_view{back}" shape="rect" alt="zoom out" coords="0,0,71,34" />
+			<area href="$url_view{back}" shape="rect" alt="zoom out" coords="0,35,71,71" />
+			<area href="$url_view{forw}" shape="rect" alt="zoom in" coords="0,0,71,34" />
 		</map>
 		<map name="horz">
 			<area href="$url_view{left}" shape="rect" alt="rotate left" coords="37,0,71,71" />
