@@ -13,7 +13,8 @@ use constant MAX_Z => 16;
 my $r = shift;
 $r->content_type('text/html');
 my $cgi = CGI->new();
-my $xtw = XTWMon->new($cgi->param("sid"));
+my $req_sid = $cgi->param("sid");
+my $xtw = XTWMon->new($req_sid);
 
 my %p;
 $p{t} = $cgi->param("t");
@@ -23,6 +24,12 @@ $p{hl} = $cgi->param("hl");
 $p{vmode} = $cgi->param("vmode");
 $p{smode} = $cgi->param("smode");
 $p{sid} = $xtw->{sid};
+
+unless (defined $req_sid and $req_sid eq $p{sid}) {
+	print $cgi->redirect(make_url($r->uri, \%p));
+	exit;
+}
+
 
 my ($clicku, $clickv) = (-1, -1);
 my $click = $cgi->param("click");
@@ -115,23 +122,7 @@ my $plot_url = make_url("plot.pl", \%p, %p_extra);
 my $click_url = make_url($uri, \%p);
 
 my $p_w = 800;
-my $p_h = 450;
-
-print <<EOF;
-		<table border="0" cellspacing="0" cellpadding="0" width="$p_w">
-			<tr>
-				<td colspan="5">
-				 <a href="${click_url}click="><img alt="[3d]" border="0" src="$plot_url"
-				  width="$p_w" height="$p_h" ismap="ismap" style="border: 1px solid white" /></a></td>
-			</tr>
-			<tr valign="top">
-				<td width="10%">
-EOF
-
-if (open FH, "< " . $xtw->getpath(_GP_LEGEND)) {
-	print <FH>;
-	close FH;
-}
+my $p_h = 600;
 
 my $img_attr = qq{border="0" style="vertical-align: middle; padding: 3px"};
 
@@ -150,27 +141,40 @@ my %urls = (
 	reload => make_url($uri, \%p_reload),
 );
 
+print <<EOF;
+		<table border="0" cellspacing="0" cellpadding="0">
+			<tr valign="top">
+				<td>
+						<a href="$urls{temp}"><img alt="[temp]"  src="img/temp.png" $img_attr /></a><br />
+						<a href="$urls{jobs}"><img alt="[jobs]"  src="img/jobs.png" $img_attr /></a><br />
+						<a href="$urls{wired}"><img alt="[wired]" src="img/wired.png" $img_attr /></a><br />
+						<a href="$urls{phys}"><img alt="[phys]"  src="img/phys.png" $img_attr /></a><br />
+						<a href="$urls{reload}"><img alt="[reload]" src="img/reload.png" $img_attr /></a><br />
+						<!-- img alt="[pan]" usemap="#pan" src="img/pan.png" $img_attr / -->
+						<img alt="[zoom]" usemap="#zoom" src="img/zoom.png" $img_attr /><br />
+						<img alt="[horz]" usemap="#horz" src="img/rot-horz.png" $img_attr /><br />
+						<img alt="[vert]" usemap="#vert" src="img/rot-vert.png" $img_attr /></td>
+				<td>
+				 <a href="${click_url}click="><img alt="[3d]" border="0" src="$plot_url"
+				  width="$p_w" height="$p_h" ismap="ismap" style="border: 1px solid white" /></a><br />
+				<div class="micro" style="text-align: right">Copyright &copy; 2005
+				  <a href="http://www.psc.edu/">Pittsburgh Supercomputing Center</a></div></td>
+				<td style="white-space: nowrap">
+					<div id="pl_node" style="height: 150px"></div>
+EOF
+
+if (open FH, "< " . $xtw->getpath(_GP_LEGEND)) {
+	local $/;
+	local $_ = <FH>;
+	s/<\/?td.*?>//g;
+	print;
+	close FH;
+}
+
 my $s = <<EOF;
 </td>
-				<td width="60%" align="right">
-					<div style="float: right">
-						<a href="$urls{temp}"><img alt="[temp]"  src="img/temp.png" $img_attr /></a>
-						<a href="$urls{jobs}"><img alt="[jobs]"  src="img/jobs.png" $img_attr /></a>
-						<a href="$urls{wired}"><img alt="[wired]" src="img/wired.png" $img_attr /></a>
-						<a href="$urls{phys}"><img alt="[phys]"  src="img/phys.png" $img_attr /></a><br />
-						<a href="$urls{reload}"><img alt="[reload]" src="img/reload.png" $img_attr /></a>
-						<!-- img alt="[pan]" usemap="#pan" src="img/pan.png" $img_attr / -->
-						<img alt="[zoom]" usemap="#zoom" src="img/zoom.png" $img_attr />
-						<img alt="[horz]" usemap="#horz" src="img/rot-horz.png" $img_attr />
-						<img alt="[vert]" usemap="#vert" src="img/rot-vert.png" $img_attr />
-					</div>
-					<div id="pl_node" style="text-align: left; float: right; clear: none"></div>
-				</td>
 			</tr>
 		</table>
-		<hr />
-		<div class="micro">Copyright &copy; 2005
-		  <a href="http://www.psc.edu/">Pittsburgh Supercomputing Center</a></div>
 		<script type='text/javascript'><!--
 EOF
 
