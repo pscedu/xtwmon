@@ -64,6 +64,7 @@ function mkurl_job(id) {
 	up['job'] = id
 	up['smode'] = 'jobs'
 	delete up['hl']
+	delete up['click']
 	return (make_url(window.location.pathname, up))
 }
 
