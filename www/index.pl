@@ -163,12 +163,31 @@ print <<EOF;
 					<div id="pl_node" style="height: 150px"></div>
 EOF
 
-if (open FH, "< " . $xtw->getpath(_GP_LEGEND)) {
-	local $/;
-	local $_ = <FH>;
-	s/<\/?td.*?>//g;
-	print;
-	close FH;
+if (($p{smode} || "") eq "temp") {
+	print <<EOF;
+<div class="job" style="background-color: rgb(0,0,102)		"></div>18-22C <br />
+<div class="job" style="background-color: rgb(204,0,102)	"></div>22-26C <br />
+<div class="job" style="background-color: rgb(153,0,153)	"></div>26-31C <br />
+<div class="job" style="background-color: rgb(102,0,204)	"></div>31-35C <br />
+<div class="job" style="background-color: rgb(51,51,255)	"></div>35-40C <br />
+<div class="job" style="background-color: rgb(0,0,255)		"></div>40-44C <br />
+<div class="job" style="background-color: rgb(0,153,153)	"></div>44-49C <br />
+<div class="job" style="background-color: rgb(0,204,0)		"></div>49-53C <br />
+<div class="job" style="background-color: rgb(102,255,0)	"></div>53-57C <br />
+<div class="job" style="background-color: rgb(255,255,0)	"></div>57-62C <br />
+<div class="job" style="background-color: rgb(255,204,51)	"></div>62-66C <br />
+<div class="job" style="background-color: rgb(255,153,0)	"></div>66-71C <br />
+<div class="job" style="background-color: rgb(255,0,0)		"></div>71-75C <br />
+<div class="job" style="background-color: rgb(255,153,153)"></div>75-80C <br />
+EOF
+} else {
+	if (open FH, "< " . $xtw->getpath(_GP_LEGEND)) {
+		local $/;
+		local $_ = <FH>;
+		s/<\/?td.*?>//g;
+		print;
+		close FH;
+	}
 }
 
 my $s = <<EOF;
