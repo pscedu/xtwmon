@@ -5,9 +5,9 @@ use lib qw(../lib);
 use POSIX;
 use XTWMon;
 use XTWMon::Color;
-use File::Path;
-use File::Copy;
 use File::Find;
+use File::Copy;
+use File::Path;
 use CGI;
 
 use strict;
@@ -203,8 +203,7 @@ sub js_dynlink {
 		qq{<!--\n							} .
 		qq{	document.write('<a href="' + $js + '">$desc</a>')	} .
 		qq{// -->							} .
-		qq{</script>							};
-EOF
+		qq{</script>};
 }
 
 sub sepcols {
@@ -247,9 +246,10 @@ EOF
 
 		my $col = join ',', @{ $job->{col} };
 		# XXX: owner name and JS characters
+		my $ltext = defined $job->{owner} ? $job->{owner} : $job->{id};
 		print LEGENDF <<HTML;
 	<div class="job" style="background-color: rgb($col);"></div>
-	@{[js_dynlink($cgi->escapeHTML($job->{owner}), "mkurl_job($jobid)")]}<br clear="all" />
+	@{[js_dynlink($cgi->escapeHTML($ltext), "mkurl_job($jobid)")]}<br clear="all" />
 HTML
 		print JSF "\n\tj = new Job($jobid)\n";
 		foreach (qw(name owner queue dur_used dur_want ncpus mem)) {
