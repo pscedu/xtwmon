@@ -59,6 +59,7 @@ my $rad = 110 - $zoom;
 my $x = $rad * cos($theta) * sin($phi);
 my $z = $rad * sin($theta) * sin($phi);
 my $y = $rad * cos($phi);
+
 my $lx = -$x;
 my $ly = -$y;
 my $lz = -$z;
@@ -68,6 +69,8 @@ if ($vmode eq "physical") {
 	$x += 58.075;
 	$y += 4.7;
 	$z += 6.4;
+
+	$lx += - $rad * cos($theta) / 6;
 } else {
 	$x += 20;
 	$y += 22;
