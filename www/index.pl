@@ -156,7 +156,7 @@ print <<EOF;
 						<img alt="[vert]" usemap="#vert" src="img/rot-vert.png" $img_attr /></td>
 				<td>
 				 <a href="${click_url}click="><img alt="[3d]" border="0" src="$plot_url"
-				  width="$p_w" height="$p_h" ismap="ismap" style="border: 1px solid white" /></a><br />
+				  width="$p_w" height="$p_h" ismap="ismap" style="border: 1px solid white; margin-right: 2px" /></a><br />
 				<div class="micro" style="text-align: right">Copyright &copy; 2005
 				  <a href="http://www.psc.edu/">Pittsburgh Supercomputing Center</a></div></td>
 				<td style="white-space: nowrap">
