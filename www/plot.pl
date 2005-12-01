@@ -27,13 +27,10 @@ $phi = 0	unless defined $phi	&& $phi		=~ /^\d+$/;
 $zoom = 0	unless defined $zoom	&& $zoom	=~ /^-?\d+$/;
 $clicku = -1	unless defined $clicku	&& $clicku	=~ /^\d+$/;
 $clickv = -1	unless defined $clickv	&& $clickv	=~ /^\d+$/;
-$sid = ""	unless defined $sid	&& $sid		=~ /^[a-zA-Z0-9]+$/;
-$vmode = ""	unless defined $vmode	&& ($vmode eq "wiredone" or $vmode eq "physical");
-$smode = ""	unless defined $smode	&& ($smode eq "jobs" or $smode eq "temp");
-$hl = ""	unless defined $hl && ($hl eq "service" or
-					$hl eq "free" or
-					$hl eq "down");
-
+$sid = ""	unless sid_valid($sid);
+$vmode = ""	unless vmode_valid($vmode);
+$smode = ""	unless smode_valid($smode);
+$hl = ""	unless hl_valid($hl);
 
 use constant PI => 3.14159265358979323;
 
