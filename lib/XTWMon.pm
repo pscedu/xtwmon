@@ -4,6 +4,8 @@
 package XTWMon;
 
 use Exporter;
+use File::Find;
+use File::Copy;
 use strict;
 use warnings;
 
@@ -19,6 +21,9 @@ our @EXPORT = qw(
 	ZOOM_MIN ZOOM_MAX
 
 	REL_SYSROOT REL_WEBROOT
+
+	make_url
+	hl_valid vmode_valid smode_valid
 );
 
 use constant _PATH_LATEST_FINAL	=> "/var/www/html/xtwmon/www/latest";
@@ -42,6 +47,8 @@ use constant _PATH_ARCHIVE	=> "/var/www/html/xtwmon/www/data-%Y-%m-%d-tm-%H-%M-%
 use constant REL_SYSROOT => 0;
 use constant REL_WEBROOT => 1;
 
+use constant SID_LEN => 12;
+
 sub new {
 	my ($class, $sid) = @_;
 	$sid = sid_gen() unless sid_valid($sid);
@@ -61,6 +68,23 @@ sub getpath {
 	)[$res]);
 }
 
+sub make_url {
+	my ($page, $rp, %params) = @_;
+	my $url = $page . "?";
+	foreach (keys %$rp) {
+		if (exists $params{$_}) {
+			$url .= "$_=$params{$_}&amp;";
+			delete $params{$_};
+		} elsif (exists $rp->{$_} && $rp->{$_}) {
+			$url .= "$_=$rp->{$_}&amp;";
+		}
+	}
+	foreach (keys %params) {
+		$url .= "$_=$params{$_}&amp;";
+	}
+	return ($url);
+}
+
 sub subst {
 	my ($value, %subs) = @_;
 	my ($k, $v);
@@ -71,7 +95,34 @@ sub subst {
 	return ($value);
 }
 
-use constant SID_LEN => 12;
+sub in_strarray {
+	my ($needle, $r_hay) = @_;
+	foreach my $i_straw (@$r_hay) {
+		return (1) if $i_straw eq $needle;
+	}
+	return (0);
+}
+
+sub hl_valid {
+	my ($hl) = @_;
+	return (0) unless defined $hl;
+	my @hls = qw( free disabled down bad check service );
+	return (in_strarray($hl, \@hls));
+}
+
+sub vmode_valid {
+	my ($vmode) = @_;
+	return (0) unless defined $vmode;
+	my @vmodes = qw( physical wiredone );
+	return (in_strarray($vmode, \@vmodes));
+}
+
+sub smode_valid {
+	my ($smode) = @_;
+	return (0) unless defined $smode;
+	my @smodes = qw( temp jobs );
+	return (in_strarray($smode, \@smodes));
+}
 
 sub sid_gen {
 	my $sid;
@@ -91,9 +142,6 @@ sub sid_valid {
 	return (defined $sid && $sid =~ /^[a-zA-Z0-9]+$/ &&
 	    -d _PATH_CLI_ROOT . "/$sid");
 }
-
-use File::Find;
-use File::Copy;
 
 sub sess_create {
 	my ($sid) = @_;
