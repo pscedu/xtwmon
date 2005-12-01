@@ -22,14 +22,17 @@ use constant _PATH_LATEST_DUMMY	=> "/var/www/html/xtwmon/www/latest-old";
 
 use constant _PATH_JOBJS	=> _PATH_LATEST . "/jobs.js";
 use constant _PATH_LEGEND	=> _PATH_LATEST . "/legend.html";
+use constant _PATH_NODEJS	=> _PATH_LATEST . "/nodes.js";
 
 use constant SKEL_DIRS		=> [qw()];
 
-use constant ST_FREE	=> 0;
-use constant ST_DOWN	=> 1;
-use constant ST_USED	=> 2;
-use constant ST_SERV	=> 3;
-use constant ST_UNAC	=> 4;
+use constant ST_FREE		=> 0;
+use constant ST_DOWN		=> 1;
+use constant ST_DISABLED	=> 2;
+use constant ST_USED		=> 3;
+use constant ST_SVC		=> 4;
+use constant ST_BAD		=> 5;
+use constant ST_CHECK		=> 6;
 
 use constant ST_MTIME => 9;
 
@@ -38,10 +41,12 @@ my $cgi = CGI->new;
 
 my @statecol = (
 	[255, 255, 255],	# FREE
-	[255, 0, 0],		# DOWN
-	[0, 0, 0],		# USED
-	[255, 255, 0],		# SERV
-	[51, 51, 255],		# UNAC
+	[ 51,  51,  51],	# DOWN
+	[255,   0,   0],	# DISABLED
+	[  0,   0,   0],	# USED
+	[255, 255,   0],	# SVC
+	[255, 153, 153],	# BAD
+	[  0, 255,   0],	# CHECK
 );
 
 # end config
@@ -49,7 +54,6 @@ my @statecol = (
 my @nodes;
 my @invmap;
 my %jobs;
-my @disnodes;
 
 parse_wimap();
 
@@ -62,6 +66,7 @@ parse_jobmap();
 parse_qstat();
 
 write_jobfiles();
+write_nodefiles();
 
 # XXX: race
 rename(_PATH_LATEST_FINAL, _PATH_LATEST_DUMMY)	or err("rename final to dummy");
@@ -74,6 +79,12 @@ sub err {
 	(my $progname = $0) =~ s!.*/!!;
 	die("$progname: " . join('', @_) . ": $!\n");
 }
+
+my %stmap = (
+	c => ST_FREE,
+	n => ST_DOWN,
+	i => ST_SVC,
+);
 
 sub parse_wimap {
 	local ($_, *WIMAP);
@@ -89,19 +100,29 @@ sub parse_wimap {
 			\s+
 
 			(\d+),(\d+),(\d+)		# xyz ($7-$9)
+			\s+
+
+			([cin])				# st ($10)
 		}x;
 		next unless @m;
 
-		my ($nid, $cb, $r, $cg, $m, $n, $x, $y, $z) = @m;
+		my ($nid, $cb, $r, $cg, $m, $n, $x, $y, $z, $st) = @m;
 
 		$nodes[$x] = [] unless ref $nodes[$x] eq "ARRAY";
 		$nodes[$x][$y] = [] unless ref $nodes[$x][$y] eq "ARRAY";
 		$invmap[$nid] = $nodes[$x][$y][$z] = {
 			nid	=> $nid,
-			col	=> $statecol[ST_FREE],
+			st	=> $stmap{$st},
+			col	=> undef,
 			x	=> $x,
 			y	=> $y,
-			z	=> $z
+			z	=> $z,
+			r	=> $r,
+			cb	=> $cb,
+			cg	=> $cg,
+			m	=> $m,
+			n	=> $n,
+			st	=> $st,
 		};
 	}
 	close WIMAP;
@@ -127,14 +148,13 @@ sub parse_jobmap {
 		my $node = $invmap[$nid];
 
 		if ($enabled == 0) {
-			$node->{col} = $statecol[ST_DOWN];
-			push @disnodes, $node;
+			$node->{st} = ST_DISABLED;
 		} elsif ($jobid) {
+			$node->{st} = ST_USED;
+			$node->{jobid} = $jobid;
 			$node->{col} = \$j->{col};
-			push @{ $j->{nodes} }, $node;
-		} else {
-			$node->{col} = $statecol[ST_FREE];
 		}
+		$node->{col} = $statecol[$node->{st}] unless $node->{col};
 	}
 	close JMAP;
 
@@ -191,7 +211,6 @@ sub job_get {
 	return $jobs{$jobid} if $jobs{$jobid};
 	$jobs{$jobid} = {
 		id => $jobid,
-		nodes => []
 	};
 }
 
@@ -227,15 +246,20 @@ JS
 	open LEGENDF, "> $fn" or err($fn);
 	print LEGENDF <<EOF;
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_FREE] }]});"></div>
-	@{[js_dynlink("Free", "mkurl_hl('free')")]}<br />
+	@{[js_dynlink("Free", "mkurl_hl('free')")]}<br clear="all" />
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_DOWN] }]});"></div>
-	@{[js_dynlink("Down (PBS)", "mkurl_hl('down')")]}<br />
-	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_SERV] }]});"></div>
-	@{[js_dynlink("Service", "mkurl_hl('service')")]}<br />
-	</td><td width="10%">
+	@{[js_dynlink("Down (HW)", "mkurl_hl('down')")]}<br clear="all" />
+	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_DISABLED] }]});"></div>
+	@{[js_dynlink("Disabled (PBS)", "mkurl_hl('disabled')")]}<br />
+	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_SVC] }]});"></div>
+	@{[js_dynlink("Service", "mkurl_hl('service')")]}<br clear="all" />
+	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_BAD] }]});"></div>
+	@{[js_dynlink("Bad", "mkurl_hl('bad')")]}<br clear="all" />
+	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_CHECK] }]});"></div>
+	@{[js_dynlink("Checking", "mkurl_hl('check')")]}<br clear="all" />
 EOF
 
-	my $n = 0; # free, down, service
+	my $n = 0; # free, disabled, service
 	my $max = scalar(keys(%jobs)) + $n;
 	my $npercols = int($max / 2 + .5); # 3 columns (2+1)
 
@@ -265,12 +289,34 @@ JS
 	close JSF;
 }
 
-sub write_nodes {
-	my ($fn, $r_nodes) = @_;
-	local *F;
+sub write_nodefiles {
+	my $fn;
+	local (*F, $_);
 
+	$fn = _PATH_NODEJS;
 	open F, "> $fn" or err($fn);
-	print F "@$_{qw(x y z)}\n" foreach (@$r_nodes);
+	print F <<EOF;
+function _ninit() {
+	var n
+EOF
+
+	foreach my $node (@invmap) {
+		next unless ref $node eq "HASH";
+
+		print F <<EOF;
+	n = new Node($node->{nid})
+EOF
+
+		foreach (qw(x y z r cg cb m n jobid)) {
+			print F "\tn.$_ = '$node->{$_}'\n"
+			    if exists $node->{$_};
+		}
+	}
+
+	print F <<EOF;
+}
+_ninit()
+EOF
 	close F;
 }
 
