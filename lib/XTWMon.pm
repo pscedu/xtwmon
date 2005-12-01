@@ -14,7 +14,6 @@ our @ISA = qw(Exporter);
 our @EXPORT = qw(
 	_PATH_LATEST_FINAL
 
-	_GP_DISABLED _GP_FREE
 	_GP_JOBJS _GP_LEGEND _GP_NODEJS
 	subst sid_gen sid_valid
 
