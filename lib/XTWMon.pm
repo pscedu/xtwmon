@@ -13,7 +13,7 @@ our @EXPORT = qw(
 	_PATH_LATEST_FINAL
 
 	_GP_DISABLED _GP_FREE
-	_GP_JOB _GP_JOBJS _GP_LEGEND
+	_GP_JOBJS _GP_LEGEND _GP_NODEJS
 	subst sid_gen sid_valid
 
 	ZOOM_MIN ZOOM_MAX
@@ -29,6 +29,7 @@ use constant _PATH_CLI_ROOT	=> "/var/www/html/xtwmon/www/sessions";
 # All paths must be absolute, since mod_perl has strange cwds.
 use constant _GP_JOBJS		=> 0;
 use constant _GP_LEGEND		=> 1;
+use constant _GP_NODEJS		=> 2;
 
 use constant CLI_SKEL_DIRS	=> [qw(jobs)];
 
@@ -55,7 +56,8 @@ sub getpath {
 	my $prefix = ($rel == REL_WEBROOT) ? "sessions" : _PATH_CLI_ROOT ;
 	return ($prefix . "/" . $obj->{sid} . (
 		"/jobs.js",		# _GP_JOBJS
-		"/legend.html"		# _GP_LEGEND
+		"/legend.html",		# _GP_LEGEND
+		"/nodes.js",		# _GP_NODEJS
 	)[$res]);
 }
 
