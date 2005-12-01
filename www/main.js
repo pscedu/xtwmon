@@ -7,47 +7,16 @@ function report(o) {
 	alert(s)
 }
 
-function adj() {
-
+function escapeHTML(s) {
+	return (s.replace(/[^a-zA-Z0-9 !@#$%^*()\[\]\/\\,.;:|_=+-]/, '&#' +
+	    RegExp.$1.charCodeAt(0) + ';'))
 }
 
-var selparent = null
-
-function selnode(dim, nid, sx, sy, ex, ey) {
-	var e_img = getimg('img' + dim)
-
-	if (e_img && document.createElement) {
-		if (selparent && selparent.firstChild)
-			selparent.removeChild(selparent.firstChild)
-		var e_cell = e_img.parentNode
-		var e_div = document.createElement('div')
-		var e_pdiv = document.createElement('div')
-		var s = 'position: relative;'
-		e_pdiv.setAttribute('style', s)
-/*
-		if (s != e_pdiv.getAttribute('style'))
-			return
-*/
-		s = 'border: 1px solid yellow; ' +
-		   'position: absolute; z-index: 5; ' +
-		   'left: ' + (sx - 1) + 'px; top: ' + (sy - 1) + 'px; ' +
-		   'width: ' + (ex - sx + 1) + 'px; height: ' + (ey - sy + 1) + 'px;'
-		e_div.setAttribute('style', s)
-/*
-		if (s != e_div.getAttribute('style'))
-			return
-*/
-		e_pdiv.appendChild(e_div)
-		e_cell.removeChild(e_img)
-		e_cell.appendChild(e_pdiv)
-		e_cell.appendChild(e_img)
-
-		selparent = e_cell
-
+function selnode() {
+	if (document.cookie) {
 		var pl = getobj('pl_node')
-		if (pl) {
-			pl.innerHTML = 'selected node ' + nid
-		}
+		pl.innerHTML = '<br />' + '<b>Node Information</b><br>' +
+		    escapeHTML(document.cookie)
 	}
 }
 
@@ -70,7 +39,7 @@ function mkurl_job(id) {
 
 function seljob(id) {
 	var j = invjmap[id]
-	var pl = getobj('pl_node')
+	var pl = getobj('pl_job')
 	if (j && pl) {
 		pl.innerHTML = '<b>Job Information</b><br />' +
 		    'ID: ' + j.id + '<br />' +
@@ -134,12 +103,6 @@ function getobj(id) {
 	return (null)
 }
 
-function getimg(name) {
-	if (document.images)
-		return (document.images[name])
-	return (null)
-}
-
 var jobs = []
 var invjmap = []
 
@@ -147,9 +110,4 @@ function Job(id) {
 	this.id = id
 	jobs[jobs.length] = invjmap[id] = this
 	return (this)
-}
-
-function preload(imgsrc) {
-	if (document.images)
-		new Image().src = imgsrc
 }
