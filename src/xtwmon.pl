@@ -61,7 +61,7 @@ foreach (@{ &SKEL_DIRS }) {
 parse_jobmap();
 parse_qstat();
 
-write_jobfiles()			if %jobs;
+write_jobfiles();
 
 # XXX: race
 rename(_PATH_LATEST_FINAL, _PATH_LATEST_DUMMY)	or err("rename final to dummy");
