@@ -6,10 +6,6 @@ use XTWMon;
 use strict;
 use warnings;
 
-use constant MAX_X => 11;
-use constant MAX_Y => 12;
-use constant MAX_Z => 16;
-
 my $r = shift;
 $r->content_type('text/html');
 my $cgi = CGI->new();
@@ -30,7 +26,6 @@ unless (defined $req_sid and $req_sid eq $p{sid}) {
 	exit;
 }
 
-
 my ($clicku, $clickv) = (-1, -1);
 my $click = $cgi->param("click");
 if ($click && $click =~ /^\?(\d+),(\d+)$/) {
@@ -40,11 +35,9 @@ if ($click && $click =~ /^\?(\d+),(\d+)$/) {
 $p{t} = 315 unless defined $p{t} && $p{t} =~ /^\d+$/;
 $p{p} = 15 unless defined $p{p} && $p{p} =~ /^\d+$/;
 $p{z} = 0 unless defined $p{z} && $p{z} =~ /^-?\d+$/;
-delete $p{hl} unless defined $p{hl} && ($p{hl} eq "service" or
-																				$p{hl} eq "free" or
-																				$p{hl} eq "down");
-$p{vmode} = "wiredone" unless defined $p{vmode} && ($p{vmode} eq "physical" or $p{vmode} eq "wiredone");
-$p{smode} = "jobs" unless defined $p{smode} && ($p{smode} eq "temp" or $p{vmode} eq "jobs");
+delete $p{hl} unless hl_valid($p{hl});
+$p{vmode} = "wiredone" unless vmode_valid($p{vmode});
+$p{smode} = "jobs" unless smode_valid($p{smode});
 
 my $tp = ($p{t} - 30) % 360;
 my $tn = ($p{t} + 30) % 360;
@@ -166,20 +159,20 @@ EOF
 
 if (($p{smode} || "") eq "temp") {
 	print <<EOF;
-<div class="job" style="background-color: rgb(255,153,153)"></div>75-80C <br clear="all" />
-<div class="job" style="background-color: rgb(255,0,0)    "></div>71-75C <br clear="all" />
-<div class="job" style="background-color: rgb(255,153,0)  "></div>66-71C <br clear="all" />
-<div class="job" style="background-color: rgb(255,204,51) "></div>62-66C <br clear="all" />
-<div class="job" style="background-color: rgb(255,255,0)  "></div>57-62C <br clear="all" />
-<div class="job" style="background-color: rgb(102,255,0)  "></div>53-57C <br clear="all" />
-<div class="job" style="background-color: rgb(0,204,0)    "></div>49-53C <br clear="all" />
-<div class="job" style="background-color: rgb(0,153,153)  "></div>44-49C <br clear="all" />
-<div class="job" style="background-color: rgb(0,0,255)    "></div>40-44C <br clear="all" />
-<div class="job" style="background-color: rgb(51,51,255)  "></div>35-40C <br clear="all" />
-<div class="job" style="background-color: rgb(102,0,204)  "></div>31-35C <br clear="all" />
-<div class="job" style="background-color: rgb(153,0,153)  "></div>26-31C <br clear="all" />
-<div class="job" style="background-color: rgb(204,0,102)  "></div>22-26C <br clear="all" />
-<div class="job" style="background-color: rgb(0,0,102)    "></div>18-22C <br clear="all" />
+					<div class="job" style="background-color: rgb(255,153,153)"></div>75-80C <br clear="all" />
+					<div class="job" style="background-color: rgb(255,0,0)    "></div>71-75C <br clear="all" />
+					<div class="job" style="background-color: rgb(255,153,0)  "></div>66-71C <br clear="all" />
+					<div class="job" style="background-color: rgb(255,204,51) "></div>62-66C <br clear="all" />
+					<div class="job" style="background-color: rgb(255,255,0)  "></div>57-62C <br clear="all" />
+					<div class="job" style="background-color: rgb(102,255,0)  "></div>53-57C <br clear="all" />
+					<div class="job" style="background-color: rgb(0,204,0)    "></div>49-53C <br clear="all" />
+					<div class="job" style="background-color: rgb(0,153,153)  "></div>44-49C <br clear="all" />
+					<div class="job" style="background-color: rgb(0,0,255)    "></div>40-44C <br clear="all" />
+					<div class="job" style="background-color: rgb(51,51,255)  "></div>35-40C <br clear="all" />
+					<div class="job" style="background-color: rgb(102,0,204)  "></div>31-35C <br clear="all" />
+					<div class="job" style="background-color: rgb(153,0,153)  "></div>26-31C <br clear="all" />
+					<div class="job" style="background-color: rgb(204,0,102)  "></div>22-26C <br clear="all" />
+					<div class="job" style="background-color: rgb(0,0,102)    "></div>18-22C <br clear="all" />
 EOF
 } else {
 	if (open FH, "< " . $xtw->getpath(_GP_LEGEND)) {
@@ -203,7 +196,6 @@ $s =~ s/(?<=>)\s+(?=<)//gs;
 print $s;
 
 print "seljob($p{job})\n" if $p{job};
-print "window.onload = selnode\n";
 
 print <<EOF;
 		// -->
@@ -211,22 +203,5 @@ print <<EOF;
 	</body>
 </html>
 EOF
-
-sub make_url {
-	my ($page, $rp, %params) = @_;
-	my $url = $page . "?";
-	foreach (keys %$rp) {
-		if (exists $params{$_}) {
-			$url .= "$_=$params{$_}&amp;";
-			delete $params{$_};
-		} elsif (exists $rp->{$_} && $rp->{$_}) {
-			$url .= "$_=$rp->{$_}&amp;";
-		}
-	}
-	foreach (keys %params) {
-		$url .= "$_=$params{$_}&amp;";
-	}
-	return ($url);
-}
 
 # vim: set ts=2:
