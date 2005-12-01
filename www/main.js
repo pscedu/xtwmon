@@ -40,7 +40,7 @@ function mkurl_job(id) {
 }
 
 function seljob(id) {
-	var j = invjmap[id]
+	var j = jobs[id]
 	var pl = getobj('pl_job')
 	if (j && pl) {
 		pl.innerHTML = '<b>Job Information</b><br />' +
@@ -106,10 +106,17 @@ function getobj(id) {
 }
 
 var jobs = []
-var invjmap = []
 
 function Job(id) {
 	this.id = id
-	jobs[jobs.length] = invjmap[id] = this
+	jobs[id] = this
+	return (this)
+}
+
+var nodes = []
+
+function Node(id) {
+	this.id = id
+	nodes[id] = this
 	return (this)
 }
