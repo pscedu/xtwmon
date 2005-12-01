@@ -160,7 +160,8 @@ print <<EOF;
 				<div class="micro" style="text-align: right">Copyright &copy; 2005
 				  <a href="http://www.psc.edu/">Pittsburgh Supercomputing Center</a></div></td>
 				<td style="white-space: nowrap">
-					<div id="pl_node" style="height: 150px; width: 100px"></div>
+					<div id="pl_job" style="height: 150px; width: 100px"></div>
+					<b>Node Legend</b><br />
 EOF
 
 if (($p{smode} || "") eq "temp") {
@@ -191,6 +192,7 @@ EOF
 }
 
 my $s = <<EOF;
+					<div id="pl_node"></div>
 </td>
 			</tr>
 		</table>
@@ -201,6 +203,7 @@ $s =~ s/(?<=>)\s+(?=<)//gs;
 print $s;
 
 print "seljob($p{job})\n" if $p{job};
+print "window.onload = selnode\n";
 
 print <<EOF;
 		// -->
