@@ -23,6 +23,8 @@ use constant DEF_LZ =>  -0.45;
 use constant WIDTH => 800;
 use constant HEIGHT => 600;
 
+use constant MSGSIZ => 1024;
+
 sub new {
 	my ($class, $req) = @_;
 	my $pkg = ref($class) || $class;
@@ -71,11 +73,25 @@ EOF
 	$data .= "vmode: $obj->{vmode}\n"	if defined $obj->{vmode};
 	$data .= "smode: $obj->{smode}\n"	if defined $obj->{smode};
 
-warn "length: ", length($data), "\n";
-warn $data, "\n";
-
 	print $s $data;
 	shutdown $s, 1; # SHUT_WR
+
+	my $buf;
+	if (read($s, $buf, MSGSIZ) != MSGSIZ) {
+		$obj->err("invalid xt3dmon server response");
+	}
+	my @lines = split /\n/, $buf;
+	foreach my $line (@lines) {
+		last unless $line;
+
+		if ($line =~ /^nid: (\d+)$/) {
+			my $cookie = CGI::cookie(
+				-name => "nodeinfo",
+				-value => $1);
+			$obj->{r}->headers_out->add('Set-Cookie' => $cookie);
+		}
+	}
+
 	my @data = <$s>;
 	my $bytes = 0;
 	local $_;
