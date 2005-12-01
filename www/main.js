@@ -20,6 +20,8 @@ function selnode() {
 	}
 }
 
+window.onload = selnode
+
 function mkurl_hl(grp) {
 	var up = url_getparams(window.location)
 	up['hl'] = grp
