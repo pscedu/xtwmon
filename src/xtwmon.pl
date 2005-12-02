@@ -51,6 +51,12 @@ my @statecol = (
 
 # end config
 
+my %stmap = (
+	c => ST_FREE,
+	n => ST_DOWN,
+	i => ST_SVC,
+);
+
 my @nodes;
 my @invmap;
 my %jobs;
@@ -80,14 +86,9 @@ sub err {
 	die("$progname: " . join('', @_) . ": $!\n");
 }
 
-my %stmap = (
-	c => ST_FREE,
-	n => ST_DOWN,
-	i => ST_SVC,
-);
-
 sub parse_wimap {
 	local ($_, *WIMAP);
+
 	open WIMAP, "< " . _PATH_WIMAP or err(_PATH_WIMAP);
 	while (<WIMAP>) {
 		# nid coord x,y,z
@@ -122,7 +123,6 @@ sub parse_wimap {
 			cg	=> $cg,
 			m	=> $m,
 			n	=> $n,
-			st	=> $st,
 		};
 	}
 	close WIMAP;
