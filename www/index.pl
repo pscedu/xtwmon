@@ -92,6 +92,7 @@ $r->print(<<EOF);
 		</script>
 		<script type="text/javascript" src="main.js"></script>
 		<script type="text/javascript" src="@{[$xtw->getpath(_GP_JOBJS, REL_WEBROOT)]}"></script>
+		<script type="text/javascript" src="@{[$xtw->getpath(_GP_NODEJS, REL_WEBROOT)]}"></script>
 	</head>
 	<body>
 		<map name="zoom">
