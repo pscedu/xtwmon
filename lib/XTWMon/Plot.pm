@@ -81,16 +81,19 @@ EOF
 		$obj->err("invalid xt3dmon server response");
 	}
 	my @lines = split /\n/, $buf;
+	my $cookie = CGI::cookie(
+		-name => "nodeinfo",
+		-value => "");
 	foreach my $line (@lines) {
 		last unless $line;
 
 		if ($line =~ /^nid: (\d+)$/) {
-			my $cookie = CGI::cookie(
+			$cookie = CGI::cookie(
 				-name => "nodeinfo",
 				-value => $1);
-			$obj->{r}->headers_out->add('Set-Cookie' => $cookie);
 		}
 	}
+	$obj->{r}->headers_out->add('Set-Cookie' => $cookie);
 
 	my @data = <$s>;
 	my $bytes = 0;
