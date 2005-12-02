@@ -12,11 +12,33 @@ function escapeHTML(s) {
 	    RegExp.$1.charCodeAt(0) + ';'))
 }
 
+var nstates = [ 'Free', 'Down (HW)', 'Disabled (PBS)', 'Used', 'Service', 'Bad', 'Check']
+
 function selnode() {
-	if (document.cookie) {
+	if (document.cookie && document.cookie.match(/nodeinfo=(\d+)/)) {
+		var nid = RegExp.$1
+		var n = nodes[nid]
+		if (n == null)
+			return
+
 		var pl = getobj('pl_node')
-		pl.innerHTML = '<br />' + '<b>Node Information</b><br>' +
-		    escapeHTML(document.cookie)
+		pl.innerHTML = '<br />' + '<b>Node Information</b><br />' +
+		    'nid: ' + n.id + '<br />'
+
+		if (n.st)
+			pl.innerHTML += 'State: ' + nstates[n.st] + '<br />'
+
+		if (n.x && n.y && n.z)
+			pl.innerHTML += 'Wired position: (' +
+			    n.x + ',' + n.y + ',' + n.z + ')<br />'
+
+		if (n.r && n.cb && n.cg && n.m && n.n)
+			pl.innerHTML += 'Physical position: (' +
+			    n.r + ',' + n.cb + ',' + n.cg + ',' +
+			    n.m + ',' + n.n + ')<br />'
+
+		if (n.jobid)
+			pl.innerHTML += 'Job ID: ' + n.jobid + '<br />'
 	}
 }
 
