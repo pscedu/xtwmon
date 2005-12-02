@@ -307,7 +307,7 @@ EOF
 	n = new Node($node->{nid})
 EOF
 
-		foreach (qw(x y z r cg cb m n jobid)) {
+		foreach (qw(x y z r cg cb m n jobid st)) {
 			print F "\tn.$_ = '$node->{$_}'\n"
 			    if exists $node->{$_};
 		}
