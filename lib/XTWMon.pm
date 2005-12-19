@@ -35,8 +35,6 @@ use constant _GP_JOBJS		=> 0;
 use constant _GP_LEGEND		=> 1;
 use constant _GP_NODEJS		=> 2;
 
-use constant CLI_SKEL_DIRS	=> [qw(jobs)];
-
 use constant ZOOM_MAX		=> 100;
 use constant ZOOM_MIN		=> -100;
 
@@ -105,7 +103,7 @@ sub in_strarray {
 sub hl_valid {
 	my ($hl) = @_;
 	return (0) unless defined $hl;
-	my @hls = qw( free disabled down bad check service );
+	my @hls = qw( free disabled down service );
 	return (in_strarray($hl, \@hls));
 }
 
@@ -146,9 +144,6 @@ sub sess_create {
 	my ($sid) = @_;
 	my $out_dir = _PATH_CLI_ROOT . "/$sid";
 	mkdir $out_dir, 0755; # XXX or die
-	foreach (@{ &CLI_SKEL_DIRS }) {
-		mkdir "$out_dir/$_", 0755;
-	}
 	find(sub {
 		my $file = $File::Find::name;
 		my $dir = _PATH_LATEST_FINAL;
