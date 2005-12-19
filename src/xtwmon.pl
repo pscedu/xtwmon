@@ -13,9 +13,8 @@ use CGI;
 use strict;
 use warnings;
 
-use constant _PATH_WIMAP	=> "/home/yanovich/code/proj/xt3dmon/data/rtrtrace";
-use constant _PATH_JOBMAP	=> "/home/yanovich/code/proj/xt3dmon/data/nids_list_phantom";
-use constant _PATH_QSTAT	=> "/home/yanovich/code/proj/xt3dmon/data/qstat.out";
+use constant _PATH_NODE		=> "/home/yanovich/code/proj/xt3dmon/data/node";
+use constant _PATH_JOB		=> "/home/yanovich/code/proj/xt3dmon/data/job";
 
 use constant _PATH_LATEST	=> "/var/www/html/xtwmon/www/latest-tmp";
 use constant _PATH_LATEST_DUMMY	=> "/var/www/html/xtwmon/www/latest-old";
@@ -24,15 +23,11 @@ use constant _PATH_JOBJS	=> _PATH_LATEST . "/jobs.js";
 use constant _PATH_LEGEND	=> _PATH_LATEST . "/legend.html";
 use constant _PATH_NODEJS	=> _PATH_LATEST . "/nodes.js";
 
-use constant SKEL_DIRS		=> [qw()];
-
 use constant ST_FREE		=> 0;
 use constant ST_DOWN		=> 1;
 use constant ST_DISABLED	=> 2;
 use constant ST_USED		=> 3;
 use constant ST_SVC		=> 4;
-use constant ST_BAD		=> 5;
-use constant ST_CHECK		=> 6;
 
 use constant ST_MTIME => 9;
 
@@ -45,8 +40,6 @@ my @statecol = (
 	[255,   0,   0],	# DISABLED
 	[  0,   0,   0],	# USED
 	[255, 255,   0],	# SVC
-	[255, 153, 153],	# BAD
-	[  0, 255,   0],	# CHECK
 );
 
 # end config
@@ -61,15 +54,10 @@ my @nodes;
 my @invmap;
 my %jobs;
 
-parse_wimap();
+parse_nodes();
+parse_jobs();
 
 mkdir $out_dir, 0755 || err("mkdir: $out_dir");
-foreach (@{ &SKEL_DIRS }) {
-	mkdir "$out_dir/$_", 0755 || err("mkdir: $out_dir/$_");
-}
-
-parse_jobmap();
-parse_qstat();
 
 write_jobfiles();
 write_nodefiles();
@@ -86,77 +74,52 @@ sub err {
 	die("$progname: " . join('', @_) . ": $!\n");
 }
 
-sub parse_wimap {
-	local ($_, *WIMAP);
+sub parse_nodes {
+	local ($_, *NODEFH);
 
-	open WIMAP, "< " . _PATH_WIMAP or err(_PATH_WIMAP);
-	while (<WIMAP>) {
-		# nid coord x,y,z
-		my @m = m{^
-			\s*
-			(\d+)				# nid ($1)
-			\s+
+	open NODEFH, "< " . _PATH_NODE or err(_PATH_NODE);
+	while (<NODEFH>) {
+		s/^\s+//;
+		next if /^#/;
+		next unless $_;
 
-			c(\d+)-(\d+)c(\d+)s(\d+)s(\d+)	# coord ($2-$6)
-			\s+
+		# nid	r cb cg m n	x y z	stat	enabled	jobid	temp	yodid	nfails
+		# 0	0 0  0  0 0	0 0 0	i	1	0	27	0	0
+		my ($nid, $r, $cb, $cg, $m, $n, $x, $y, $z, $st, $enabled,
+		    $jobid, $temp, $yodid, $nfails) = split /\s+/, $_;
 
-			(\d+),(\d+),(\d+)		# xyz ($7-$9)
-			\s+
+		my $state = $stmap{$st};
+		$state = ST_DISABLED unless $enabled;
 
-			([cin])				# st ($10)
-		}x;
-		next unless @m;
+		my $color = $statecol[$state];
 
-		my ($nid, $cb, $r, $cg, $m, $n, $x, $y, $z, $st) = @m;
-
-		$nodes[$x] = [] unless ref $nodes[$x] eq "ARRAY";
-		$nodes[$x][$y] = [] unless ref $nodes[$x][$y] eq "ARRAY";
-		$invmap[$nid] = $nodes[$x][$y][$z] = {
+		$nodes[$x]	= [] unless ref $nodes[$x]	eq "ARRAY";
+		$nodes[$x][$y]	= [] unless ref $nodes[$x][$y]	eq "ARRAY";
+		my $node = $invmap[$nid] = $nodes[$x][$y][$z] = {
 			nid	=> $nid,
-			st	=> $stmap{$st},
-			col	=> undef,
-			x	=> $x,
-			y	=> $y,
-			z	=> $z,
+			col	=> $color,
+
 			r	=> $r,
 			cb	=> $cb,
 			cg	=> $cg,
 			m	=> $m,
 			n	=> $n,
+			x	=> $x,
+			y	=> $y,
+			z	=> $z,
+			st	=> $state,
+			job	=> job_get($jobid),
+			temp	=> $temp,
+			nfails	=> $nfails,
 		};
-	}
-	close WIMAP;
-}
 
-sub parse_jobmap {
-	local ($_, *JMAP);
-	open JMAP, "< " . _PATH_JOBMAP or err(_PATH_JOBMAP);
-	while (<JMAP>) {
-		# nid enabled jobid
-		my @m = m{^
-			\s*
-			(\d+)			# nid ($1)
-			\s+
-			(\d+)			# enabled ($2)
-			\s+
-			(\d+)			# jobid ($3)
-		}x;
-		next unless @m;
-		my ($nid, $enabled, $jobid) = @m;
-		next unless $invmap[$nid];
-		my $j = $invmap[$nid]{job} = job_get($jobid);
-		my $node = $invmap[$nid];
-
-		if ($enabled == 0) {
-			$node->{st} = ST_DISABLED;
-		} elsif ($jobid) {
-			$node->{st} = ST_USED;
-			$node->{jobid} = $jobid;
-			$node->{col} = \$j->{col};
+		if ($jobid) {
+			$state = ST_USED;
+			$node->{col} = \$node->{job}{col};
 		}
-		$node->{col} = $statecol[$node->{st}] unless $node->{col};
+
 	}
-	close JMAP;
+	close NODEFH;
 
 	my @keys = sort { $a <=> $b } keys %jobs;
 	my $len = scalar @keys;
@@ -166,15 +129,15 @@ sub parse_jobmap {
 	}
 }
 
-sub parse_qstat {
-	local ($_, *QSTAT);
+sub parse_jobs {
+	local ($_, *JOBFH);
 	my $eof;
 
 	my %j = (state => "", id => 0);
-	open QSTAT, "< " . _PATH_QSTAT or err(_PATH_QSTAT);
+	open JOBFH, "< " . _PATH_JOB or err(_PATH_JOB);
 	for (;;) {
-		$eof = eof QSTAT;
-		defined($_ = <QSTAT>) && chomp;
+		$eof = eof JOBFH;
+		defined($_ = <JOBFH>) && chomp;
 		if ($eof or /^Job Id: (\d+)/) {
 			# Save old job
 			if ($j{state} eq 'R' && exists $jobs{$j{id}}) {
@@ -202,7 +165,7 @@ sub parse_qstat {
 			$j{mem} = $1;
 		}
 	}
-	close QSTAT;
+	close JOBFH;
 }
 
 sub job_get {
@@ -248,15 +211,11 @@ JS
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_FREE] }]});"></div>
 	@{[js_dynlink("Free", "mkurl_hl('free')")]}<br clear="all" />
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_DOWN] }]});"></div>
-	@{[js_dynlink("Down (HW)", "mkurl_hl('down')")]}<br clear="all" />
+	@{[js_dynlink("Down (CPA)", "mkurl_hl('down')")]}<br clear="all" />
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_DISABLED] }]});"></div>
 	@{[js_dynlink("Disabled (PBS)", "mkurl_hl('disabled')")]}<br />
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_SVC] }]});"></div>
 	@{[js_dynlink("Service", "mkurl_hl('service')")]}<br clear="all" />
-	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_BAD] }]});"></div>
-	@{[js_dynlink("Bad", "mkurl_hl('bad')")]}<br clear="all" />
-	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_CHECK] }]});"></div>
-	@{[js_dynlink("Checking", "mkurl_hl('check')")]}<br clear="all" />
 EOF
 
 	my $n = 0; # free, disabled, service
@@ -307,7 +266,7 @@ EOF
 	n = new Node($node->{nid})
 EOF
 
-		foreach (qw(x y z r cg cb m n jobid st)) {
+		foreach (qw(x y z r cg cb m n jobid st temp)) {
 			print F "\tn.$_ = '$node->{$_}'\n"
 			    if exists $node->{$_};
 		}
