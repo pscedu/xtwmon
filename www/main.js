@@ -12,7 +12,7 @@ function escapeHTML(s) {
 	    RegExp.$1.charCodeAt(0) + ';'))
 }
 
-var nstates = [ 'Free', 'Down (HW)', 'Disabled (PBS)', 'Used', 'Service', 'Bad', 'Check']
+var nstates = [ 'Free', 'Down (CPA)', 'Disabled (PBS)', 'Used', 'Service']
 
 function selnode() {
 	if (document.cookie && document.cookie.match(/nodeinfo=(\d+)/)) {
@@ -39,6 +39,9 @@ function selnode() {
 
 		if (n.jobid)
 			pl.innerHTML += 'Job ID: ' + n.jobid + '<br />'
+
+		if (n.temp)
+			pl.innerHTML += 'Temperature: ' + n.temp + '<br />'
 	}
 }
 
