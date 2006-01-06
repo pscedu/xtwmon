@@ -36,7 +36,7 @@ my $cgi = CGI->new;
 
 my @statecol = (
 	[255, 255, 255],	# FREE
-	[ 51,  51,  51],	# DOWN
+	[170, 170, 170],	# DOWN
 	[255,   0,   0],	# DISABLED
 	[  0,   0,   0],	# USED
 	[255, 255,   0],	# SVC
