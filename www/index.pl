@@ -151,11 +151,11 @@ print <<EOF;
 				<td>
 				 <a href="${click_url}click="><img alt="[3d]" border="0" src="$plot_url"
 				  width="$p_w" height="$p_h" ismap="ismap" style="border: 1px solid white; margin-right: 2px" /></a><br />
-				<div class="micro" style="text-align: right">Copyright &copy; 2005
+				<div class="micro" style="text-align: right">
+					<a href="mailto:support\@psc.edu">Help</a> | Copyright &copy; 2005-2006
 				  <a href="http://www.psc.edu/">Pittsburgh Supercomputing Center</a></div></td>
-				<td style="white-space: nowrap">
-					<div id="pl_job" style="height: 150px; width: 100px"></div>
-					<b>Node Legend</b><br />
+				<td>
+					<b>- Node Legend -</b><br />
 EOF
 
 if (($p{smode} || "") eq "temp") {
@@ -186,7 +186,13 @@ EOF
 }
 
 my $s = <<EOF;
-					<div id="pl_node"></div>
+<br />
+					<div id="pl_job">
+						<b>- Job Information -</b><br />
+						No job selected (click one from the list above).</div><br />
+					<div id="pl_node">
+						<b>- Node Information -</b><br />
+						No node selected (click one).</div>
 </td>
 			</tr>
 		</table>
