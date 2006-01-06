@@ -109,6 +109,7 @@ sub parse_nodes {
 			z	=> $z,
 			st	=> $state,
 			job	=> job_get($jobid),
+			jobid	=> $jobid,
 			temp	=> $temp,
 			nfails	=> $nfails,
 		};
@@ -216,6 +217,9 @@ JS
 	@{[js_dynlink("Disabled (PBS)", "mkurl_hl('disabled')")]}<br />
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_SVC] }]});"></div>
 	@{[js_dynlink("Service", "mkurl_hl('service')")]}<br clear="all" />
+	<div class="job" style="border: 2px double"></div>
+	@{[js_dynlink("Show all jobs", "mkurl_job(0)")]}<br clear="all" />
+	<br />
 EOF
 
 	my $n = 0; # free, disabled, service
@@ -229,7 +233,8 @@ EOF
 
 		my $col = join ',', @{ $job->{col} };
 		# XXX: owner name and JS characters
-		my $ltext = defined $job->{owner} ? $job->{owner} : $job->{id};
+		my $ltext = defined $job->{owner} ?
+		    "$job->{owner} (job $job->{id})" : "job $job->{id}";
 		print LEGENDF <<HTML;
 	<div class="job" style="background-color: rgb($col);"></div>
 	@{[js_dynlink($cgi->escapeHTML($ltext), "mkurl_job($jobid)")]}<br clear="all" />
