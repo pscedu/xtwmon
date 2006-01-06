@@ -22,26 +22,28 @@ function selnode() {
 			return
 
 		var pl = getobj('pl_node')
-		pl.innerHTML = '<br />' + '<b>Node Information</b><br />' +
-		    'nid: ' + n.id + '<br />'
+		pl.innerHTML = '<b>- Node Information -</b><br />' +
+		    'NID: ' + n.id
 
 		if (n.st)
-			pl.innerHTML += 'State: ' + nstates[n.st] + '<br />'
+			pl.innerHTML += '<br />State: ' + nstates[n.st]
 
 		if (n.x && n.y && n.z)
-			pl.innerHTML += 'Wired position: (' +
-			    n.x + ',' + n.y + ',' + n.z + ')<br />'
+			pl.innerHTML += '<br />Wired position: (' +
+			    n.x + ',' + n.y + ',' + n.z + ')'
 
 		if (n.r && n.cb && n.cg && n.m && n.n)
-			pl.innerHTML += 'Physical position: (' +
+			pl.innerHTML += '<br />Physical position: (' +
 			    n.r + ',' + n.cb + ',' + n.cg + ',' +
-			    n.m + ',' + n.n + ')<br />'
+			    n.m + ',' + n.n + ')'
 
-		if (n.jobid)
-			pl.innerHTML += 'Job ID: ' + n.jobid + '<br />'
+		if (Number(n.jobid))
+			pl.innerHTML += '<br />Job ID: ' + n.jobid + ' (' +
+			    '<a href="' + mkurl_job(n.jobid) +
+			    '">View only this job</a>)'
 
 		if (n.temp)
-			pl.innerHTML += 'Temperature: ' + n.temp + '<br />'
+			pl.innerHTML += '<br />Temperature: ' + n.temp + '&deg;C'
 	}
 }
 
@@ -68,7 +70,7 @@ function seljob(id) {
 	var j = jobs[id]
 	var pl = getobj('pl_job')
 	if (j && pl) {
-		pl.innerHTML = '<b>Job Information</b><br />' +
+		pl.innerHTML = '<b>- Job Information -</b><br />' +
 		    'ID: ' + j.id + '<br />' +
 		    (j.name  ? 'Name: '   + j.name  + '<br />' : '') +
 		    (j.owner ? 'Owner: '  + j.owner + '<br />' : '') +
@@ -93,7 +95,6 @@ function seljob(id) {
 			    dw_hr + ':' + dw_min +
 			    ' (' + prog + '%)' + '<br />'
 		}
-		pl.innerHTML += '<br />'
 	}
 }
 
