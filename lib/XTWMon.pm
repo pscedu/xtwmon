@@ -19,6 +19,7 @@ our @EXPORT = qw(
 
 	ZOOM_MIN ZOOM_MAX
 
+	_PATH_SYSROOT
 	REL_SYSROOT REL_WEBROOT
 
 	make_url
@@ -29,6 +30,8 @@ use constant _PATH_LATEST_FINAL	=> "/var/www/html/xtwmon/www/latest";
 
 # Need trailing slash below.
 use constant _PATH_CLI_ROOT	=> "/var/www/html/xtwmon/www/sessions";
+
+use constant _PATH_SYSROOT	=> "/var/www/html/xtwmon/www";
 
 # All paths must be absolute, since mod_perl has strange cwds.
 use constant _GP_JOBJS		=> 0;
