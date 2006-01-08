@@ -13,6 +13,8 @@ use warnings;
 use constant XT3D_HOST => "localhost";
 use constant XT3D_PORT => 24242;
 
+use constant _PATH_ERRORIMG => _PATH_SYSROOT . "/img/error.png";
+
 use constant DEF_X  => -55.00;
 use constant DEF_Y  =>  38.00;
 use constant DEF_Z  =>  70.00;
@@ -46,12 +48,21 @@ sub new {
 	}, $pkg;
 }
 
+sub reterr {
+	my $obj = shift;
+	warn "xtwmon plot: ", @_, ": $!\n";
+	open FP, "<" . _PATH_ERRORIMG or $obj->err(@_);
+	print <FP>;
+	close FP;
+	exit;
+}
+
 sub print {
 	my ($obj) = @_;
 	my $s = IO::Socket::INET->new(
 		PeerAddr => XT3D_HOST,
 		PeerPort => XT3D_PORT,
-		Proto => 'tcp') or $obj->err("socket");
+		Proto => 'tcp') or $obj->reterr("socket");
 	my ($sw, $sh) = (WIDTH, HEIGHT);
 
 	my $data = <<EOF;
