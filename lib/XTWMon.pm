@@ -14,7 +14,7 @@ our @ISA = qw(Exporter);
 our @EXPORT = qw(
 	_PATH_LATEST_FINAL
 
-	_GP_JOBJS _GP_LEGEND _GP_NODEJS
+	_GP_JOBJS _GP_LEGEND _GP_NODEJS _GP_YODJS
 	subst sid_gen sid_valid
 
 	ZOOM_MIN ZOOM_MAX
@@ -37,6 +37,7 @@ use constant _PATH_SYSROOT	=> "/var/www/html/xtwmon/www";
 use constant _GP_JOBJS		=> 0;
 use constant _GP_LEGEND		=> 1;
 use constant _GP_NODEJS		=> 2;
+use constant _GP_YODJS		=> 3;
 
 use constant ZOOM_MAX		=> 100;
 use constant ZOOM_MIN		=> -100;
@@ -65,6 +66,7 @@ sub getpath {
 		"/jobs.js",		# _GP_JOBJS
 		"/legend.html",		# _GP_LEGEND
 		"/nodes.js",		# _GP_NODEJS
+		"/yods.js",		# _GP_YODJS
 	)[$res]);
 }
 
