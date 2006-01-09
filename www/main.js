@@ -95,6 +95,13 @@ function seljob(id) {
 			    dw_hr + ':' + dw_min +
 			    ' (' + prog + '%)' + '<br />'
 		}
+
+		if (Number(j.yodid) && yods[j.yodid]) {
+			var y = yods[j.yodid]
+
+			pl.innerHTML += 'Yod ID: ' + y.id + '<br />' +
+			    'Yod command: ' + y.cmd + '<br />'
+		}
 	}
 }
 
@@ -144,5 +151,13 @@ var nodes = []
 function Node(id) {
 	this.id = id
 	nodes[id] = this
+	return (this)
+}
+
+var yods = []
+
+function Yod(id) {
+	this.id = id
+	yods[id] = this
 	return (this)
 }
