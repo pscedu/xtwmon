@@ -93,6 +93,7 @@ $r->print(<<EOF);
 		<script type="text/javascript" src="main.js"></script>
 		<script type="text/javascript" src="@{[$xtw->getpath(_GP_JOBJS, REL_WEBROOT)]}"></script>
 		<script type="text/javascript" src="@{[$xtw->getpath(_GP_NODEJS, REL_WEBROOT)]}"></script>
+		<script type="text/javascript" src="@{[$xtw->getpath(_GP_YODJS, REL_WEBROOT)]}"></script>
 	</head>
 	<body>
 		<map name="zoom">
@@ -154,7 +155,7 @@ print <<EOF;
 				<div class="micro" style="text-align: right">
 					<a href="mailto:support\@psc.edu">Help</a> | Copyright &copy; 2005-2006
 				  <a href="http://www.psc.edu/">Pittsburgh Supercomputing Center</a></div></td>
-				<td>
+				<td style="white-space: nowrap">
 					<b>- Node Legend -</b><br />
 EOF
 
@@ -189,10 +190,10 @@ my $s = <<EOF;
 <br />
 					<div id="pl_job">
 						<b>- Job Information -</b><br />
-						No job selected (click one from the list above).</div><br />
+						No job selected (select one from the list above).</div><br />
 					<div id="pl_node">
 						<b>- Node Information -</b><br />
-						No node selected (click one).</div>
+						No node selected (select one from the plot).</div>
 </td>
 			</tr>
 		</table>
