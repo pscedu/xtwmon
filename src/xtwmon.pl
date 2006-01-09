@@ -15,6 +15,7 @@ use warnings;
 
 use constant _PATH_NODE		=> "/home/yanovich/code/proj/xt3dmon/data/node";
 use constant _PATH_JOB		=> "/home/yanovich/code/proj/xt3dmon/data/job";
+use constant _PATH_YOD		=> "/home/yanovich/code/proj/xt3dmon/data/yod";
 
 use constant _PATH_LATEST	=> "/var/www/html/xtwmon/www/latest-tmp";
 use constant _PATH_LATEST_DUMMY	=> "/var/www/html/xtwmon/www/latest-old";
@@ -22,6 +23,7 @@ use constant _PATH_LATEST_DUMMY	=> "/var/www/html/xtwmon/www/latest-old";
 use constant _PATH_JOBJS	=> _PATH_LATEST . "/jobs.js";
 use constant _PATH_LEGEND	=> _PATH_LATEST . "/legend.html";
 use constant _PATH_NODEJS	=> _PATH_LATEST . "/nodes.js";
+use constant _PATH_YODJS	=> _PATH_LATEST . "/yods.js";
 
 use constant ST_FREE		=> 0;
 use constant ST_DOWN		=> 1;
@@ -53,12 +55,15 @@ my %stmap = (
 my @nodes;
 my @invmap;
 my %jobs;
+my %yods;
 
 parse_nodes();
 parse_jobs();
+parse_yods();
 
 mkdir $out_dir, 0755 || err("mkdir: $out_dir");
 
+write_yodfiles();
 write_jobfiles();
 write_nodefiles();
 
@@ -89,9 +94,14 @@ sub parse_nodes {
 		    $jobid, $temp, $yodid, $nfails) = split /\s+/, $_;
 
 		my $state = $stmap{$st};
-		$state = ST_DISABLED unless $enabled;
+		$state = ST_DISABLED if $state eq ST_FREE and not $enabled;
 
 		my $color = $statecol[$state];
+
+		my $r_job = job_get($jobid);
+		if (ref $r_job eq "HASH") {
+			$r_job->{yodid} = $yodid;
+		}
 
 		$nodes[$x]	= [] unless ref $nodes[$x]	eq "ARRAY";
 		$nodes[$x][$y]	= [] unless ref $nodes[$x][$y]	eq "ARRAY";
@@ -108,7 +118,7 @@ sub parse_nodes {
 			y	=> $y,
 			z	=> $z,
 			st	=> $state,
-			job	=> job_get($jobid),
+			job	=> $r_job,
 			jobid	=> $jobid,
 			temp	=> $temp,
 			nfails	=> $nfails,
@@ -128,6 +138,24 @@ sub parse_nodes {
 	foreach my $j (@keys) {
 		$jobs{$j}{col} = col_get($t++, $len);
 	}
+}
+
+sub parse_yods {
+	local ($_, *YODFH);
+	my $eof;
+
+	open YODFH, "< " . _PATH_YOD or err(_PATH_YOD);
+	while (<YODFH>) {
+		chomp;
+		my ($y_id, $y_partid, $y_ncpus, $y_cmd) = split /\s+/, $_, 4;
+		$yods{$y_id} = {
+			id	=> $y_id,
+			partid	=> $y_partid,
+			ncpus	=> $y_ncpus,
+			cmd	=> $y_cmd,
+		};
+	}
+	close YODFH;
 }
 
 sub parse_jobs {
@@ -178,6 +206,31 @@ sub job_get {
 	};
 }
 
+sub write_yodfiles {
+	my ($yodid, $yod, $fn);
+	local *JSF;
+
+	$fn = _PATH_YODJS;
+	open JSF, "> $fn" or err($fn);
+	print JSF <<JS;
+function _yinit() {
+	var y
+JS
+
+	while (($yodid, $yod) = each %yods) {
+		print JSF "\n\ty = new Yod($yodid)\n";
+		foreach (qw(ncpus cmd partid)) {
+			print JSF "\ty.$_ = '$yod->{$_}'\n";
+		}
+	}
+
+	print JSF <<JS;
+}
+_yinit()
+JS
+	close JSF;
+}
+
 # Arguments are the link text and Javascript code that
 # returns a URL.
 sub js_dynlink {
@@ -217,7 +270,7 @@ JS
 	@{[js_dynlink("Disabled (PBS)", "mkurl_hl('disabled')")]}<br />
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_SVC] }]});"></div>
 	@{[js_dynlink("Service", "mkurl_hl('service')")]}<br clear="all" />
-	<div class="job" style="border: 2px double"></div>
+	<div class="job" style="border-color: white"></div>
 	@{[js_dynlink("Show all jobs", "mkurl_job(0)")]}<br clear="all" />
 	<br />
 EOF
@@ -240,7 +293,7 @@ EOF
 	@{[js_dynlink($cgi->escapeHTML($ltext), "mkurl_job($jobid)")]}<br clear="all" />
 HTML
 		print JSF "\n\tj = new Job($jobid)\n";
-		foreach (qw(name owner queue dur_used dur_want ncpus mem)) {
+		foreach (qw(name owner queue dur_used dur_want ncpus mem yodid)) {
 			print JSF "\tj.$_ = '$job->{$_}'\n" if exists $job->{$_};
 		}
 	}
