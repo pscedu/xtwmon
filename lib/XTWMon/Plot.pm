@@ -89,7 +89,7 @@ EOF
 
 	my $buf;
 	if (read($s, $buf, MSGSIZ) != MSGSIZ) {
-		$obj->err("invalid xt3dmon server response");
+		$obj->reterr("invalid xt3dmon server response");
 	}
 	my @lines = split /\n/, $buf;
 	my $cookie = CGI::cookie(
@@ -112,6 +112,7 @@ EOF
 	foreach (@data) {
 		$bytes += length;
 	}
+	$obj->reterr("zero-length image") if $bytes == 0;
 	$obj->{r}->set_content_length($bytes);
 	# $obj->{r}->set_last_modified(time() - 3600);
 	print @data;
