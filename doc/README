@@ -3,4 +3,19 @@ $Id$
 xtwmon README
 =============
 
+Add the following inside a <VirtualHost *.443> block
+of httpd.conf:
 
+	<Location "/xtwmon">
+		SSLRequireSSL
+		AuthType KerberosV5
+		AuthName "PSC.EDU Kerberos 5"
+#		KrbServiceName HTTP
+#		Krb5AuthRealms PSC.EDU
+#		Krb5Keytab /etc/*.keytab
+#		KrbMethodNegotiate on
+#		KrbMethodK5Password on
+		Order allow,deny
+		require valid-user
+		Allow from all
+	</Location>
