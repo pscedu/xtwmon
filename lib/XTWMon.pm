@@ -6,12 +6,16 @@ package XTWMon;
 use Exporter;
 use File::Find;
 use File::Copy;
+use CGI;
 use strict;
 use warnings;
 
 our @ISA = qw(Exporter);
 
 our @EXPORT = qw(
+	PRIV_NONE PRIV_REG PRIV_ADMIN
+	hasprivs
+
 	_PATH_LATEST_FINAL
 
 	_GP_JOBJS _GP_LEGEND _GP_NODEJS _GP_YODJS
@@ -25,6 +29,10 @@ our @EXPORT = qw(
 	make_url
 	hl_valid vmode_valid smode_valid
 );
+
+use constant PRIV_NONE		=> 0;
+use constant PRIV_REG		=> 1;
+use constant PRIV_ADMIN		=> 2;
 
 use constant _PATH_LATEST_FINAL	=> "/var/www/html/xtwmon/www/latest";
 
@@ -52,10 +60,32 @@ use constant SID_LEN => 12;
 
 sub new {
 	my ($class, $sid) = @_;
+	my $cgi = CGI->new;
+
 	$sid = sid_gen() unless sid_valid($sid);
 	return bless {
-		sid	=> $sid,
+		sid		=> $sid,
+		cgi		=> $cgi,
+		admins		=> [qw(dsimmel scott yanovich)],
 	}, $class;
+}
+
+sub hasprivs {
+	my ($obj, $priv) = @_;
+	my $loggedin = (defined $obj->{cgi}->remote_user);
+
+	if ($priv == PRIV_NONE) {
+		return (1);
+	} elsif ($priv == PRIV_REG) {
+		return ($loggedin);
+	} elsif ($priv == PRIV_ADMIN) {
+		if ($loggedin) {
+			(my $uname = $obj->{cgi}->remote_user) =~ s/@.*//;
+			return (in_strarray($uname, $obj->{admins}));
+		}
+		return (0);
+	}
+	return (0);
 }
 
 sub getpath {
