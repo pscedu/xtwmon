@@ -134,7 +134,9 @@ my %urls = (
 	wired	=> make_url($uri, \%p, vmode => "wiredone"),
 	phys	=> make_url($uri, \%p, vmode => "physical"),
 	reload => make_url($uri, \%p_reload),
+	login => make_url($uri, \%p),
 );
+$urls{login} = "https://" . $cgi->server_name() . $urls{login};
 
 print <<EOF;
 		<table border="0" cellspacing="0" cellpadding="0">
@@ -152,9 +154,17 @@ print <<EOF;
 				<td>
 				 <a href="${click_url}click="><img alt="[3d]" border="0" src="$plot_url"
 				  width="$p_w" height="$p_h" ismap="ismap" style="border: 1px solid white; margin-right: 2px" /></a><br />
-				<div class="micro" style="text-align: right">
+				<div class="micro" style="float: right">
 					<a href="mailto:support\@psc.edu">Help</a> | Copyright &copy; 2005-2006
-				  <a href="http://www.psc.edu/">Pittsburgh Supercomputing Center</a></div></td>
+				  <a href="http://www.psc.edu/">Pittsburgh Supercomputing Center</a></div>
+EOF
+
+if (!$xtw->logged_in) {
+	print qq!<div class="micro"><a href="$urls{login}">Login</a></div>!;
+}
+
+print <<EOF;
+</td>
 				<td style="white-space: nowrap">
 					<b>- Node Legend -</b><br />
 EOF
