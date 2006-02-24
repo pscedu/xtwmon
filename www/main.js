@@ -99,8 +99,10 @@ function seljob(id) {
 		if (Number(j.yodid) && yods[j.yodid]) {
 			var y = yods[j.yodid]
 
-			pl.innerHTML += 'Yod ID: ' + y.id + '<br />' +
-			    'Yod command: ' + y.cmd + '<br />'
+			pl.innerHTML += 'Yod ID: ' + y.id + '<br />'
+
+			if (y.cmd)
+				pl.innerHTML += 'Yod command: ' + y.cmd + '<br />'
 		}
 	}
 }
