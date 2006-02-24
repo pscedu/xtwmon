@@ -46,6 +46,7 @@ use constant _PATH_WEBROOT	=> "/xtwmon/www";
 
 use constant _PATH_LATEST_FINAL	=> "/var/www/html/xtwmon/data/latest";
 use constant _PATH_CLI_ROOT	=> "/var/www/html/xtwmon/data/sessions";
+use constant _PATH_ADMIN	=> "/var/www/html/xtwmon/data/admin";
 use constant _PATH_ARBITER	=> "/arbiter.pl";
 
 use constant REL_SYSROOT	=> 0;
@@ -63,10 +64,12 @@ sub new {
 	$p{flags} = 0 unless exists $p{flags} and
 	    defined $p{flags} and $p{flags} =~ /^\d+$/;
 
+	# Object construction is delicate.
 	my $obj = bless {
 		cgi	=> $p{cgi},
-		admins	=> [qw(dsimmel scott yanovich)],
 	}, $class;
+	$obj->{admins} = $obj->_getadmins();
+
 	my $sid = $obj->{cgi}->param("sid");
 	if ($obj->sid_valid($sid)) {
 		$obj->{sid} = $sid;
@@ -76,6 +79,20 @@ sub new {
 		$obj->{sid} = $obj->sid_gen();
 	}
 	return ($obj);
+}
+
+sub _getadmins {
+	my ($obj) = @_;
+	local *F;
+
+	my @adm;
+	open F, "<", _PATH_ADMIN or $obj->err(_PATH_ADMIN);
+	while (<F>) {
+		push @adm, split /,/;
+	}
+	close F;
+
+	return (\@adm);
 }
 
 sub haspriv {
