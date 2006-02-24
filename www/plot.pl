@@ -10,6 +10,7 @@ use warnings;
 
 my $r = shift;
 my $cgi = CGI->new();
+my $xtw = XTWMon->new(cgi => $cgi, flags => XCF_REQSID);
 
 my $job = $cgi->param("job");
 my $theta = $cgi->param("t");
@@ -18,16 +19,15 @@ my $zoom = $cgi->param("z");
 my $clicku = $cgi->param("clicku");
 my $clickv = $cgi->param("clickv");
 my $hl = $cgi->param("hl");
-my $sid = $cgi->param("sid");
 my $vmode = $cgi->param("vmode");
 my $smode = $cgi->param("smode");
+my $sid = $xtw->{sid};
 
 $theta = 0	unless defined $theta	&& $theta	=~ /^\d+$/;
 $phi = 0	unless defined $phi	&& $phi		=~ /^\d+$/;
 $zoom = 0	unless defined $zoom	&& $zoom	=~ /^-?\d+$/;
 $clicku = -1	unless defined $clicku	&& $clicku	=~ /^\d+$/;
 $clickv = -1	unless defined $clickv	&& $clickv	=~ /^\d+$/;
-$sid = ""	unless sid_valid($sid);
 $vmode = ""	unless vmode_valid($vmode);
 $smode = ""	unless smode_valid($smode);
 $hl = ""	unless hl_valid($hl);
