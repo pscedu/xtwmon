@@ -3,14 +3,14 @@
 
 use lib qw(../lib);
 use XTWMon;
+use CGI;
 use strict;
 use warnings;
 
 my $r = shift;
 $r->content_type('text/html');
 my $cgi = CGI->new();
-my $req_sid = $cgi->param("sid");
-my $xtw = XTWMon->new($req_sid);
+my $xtw = XTWMon->new(cgi => $cgi);
 
 my %p;
 $p{t} = $cgi->param("t");
@@ -21,10 +21,11 @@ $p{vmode} = $cgi->param("vmode");
 $p{smode} = $cgi->param("smode");
 $p{sid} = $xtw->{sid};
 
-unless (defined $req_sid and $req_sid eq $p{sid}) {
-	print $cgi->redirect(make_url($r->uri, \%p));
-	exit;
-}
+#
+#unless (defined $req_sid and $req_sid eq $p{sid}) {
+#	print $cgi->redirect(make_url($r->uri, \%p));
+#	exit;
+#}
 
 my ($clicku, $clickv) = (-1, -1);
 my $click = $cgi->param("click");
@@ -76,6 +77,16 @@ my %url_view = (
 	back  => make_url($uri, \%p, z => $zp),
 );
 
+my %js_p;
+@js_p{qw(sid)} = @p{qw(sid)};
+
+my $arb_url = $xtw->getpath(_PATH_ARBITER, REL_WEBROOT);
+my %js_urls = (
+	jobs	=> make_url($arb_url, \%js_p, data => "jobs"),
+	nodes	=> make_url($arb_url, \%js_p, data => "nodes"),
+	yods	=> make_url($arb_url, \%js_p, data => "yods"),
+);
+
 $r->print(<<EOF);
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN">
 
@@ -91,9 +102,9 @@ $r->print(<<EOF);
 			// -->
 		</script>
 		<script type="text/javascript" src="main.js"></script>
-		<script type="text/javascript" src="@{[$xtw->getpath(_GP_JOBJS, REL_WEBROOT)]}"></script>
-		<script type="text/javascript" src="@{[$xtw->getpath(_GP_NODEJS, REL_WEBROOT)]}"></script>
-		<script type="text/javascript" src="@{[$xtw->getpath(_GP_YODJS, REL_WEBROOT)]}"></script>
+		<script type="text/javascript" src="$js_urls{jobs}"></script>
+		<script type="text/javascript" src="$js_urls{nodes}"></script>
+		<script type="text/javascript" src="$js_urls{yods}"></script>
 	</head>
 	<body>
 		<map name="zoom">
@@ -153,13 +164,14 @@ print <<EOF;
 						<img alt="[vert]" usemap="#vert" src="img/rot-vert.png" $img_attr /></td>
 				<td>
 				 <a href="${click_url}click="><img alt="[3d]" border="0" src="$plot_url"
-				  width="$p_w" height="$p_h" ismap="ismap" style="border: 1px solid white; margin-right: 2px" /></a><br />
+				  width="$p_w" height="$p_h" ismap="ismap"
+					style="border: 1px solid white; margin-right: 2px" /></a><br />
 				<div class="micro" style="float: right">
 					<a href="mailto:support\@psc.edu">Help</a> | Copyright &copy; 2005-2006
 				  <a href="http://www.psc.edu/">Pittsburgh Supercomputing Center</a></div>
 EOF
 
-if (!$xtw->logged_in) {
+if ($xtw->haspriv(PRIV_NONE)) {
 	print qq!<div class="micro"><a href="$urls{login}">Login</a></div>!;
 }
 
@@ -187,11 +199,23 @@ if (($p{smode} || "") eq "temp") {
 					<div class="job" style="background-color: rgb(0,0,102)    "></div>18-22C <br clear="all" />
 EOF
 } else {
-	if (open FH, "< " . $xtw->getpath(_GP_LEGEND)) {
+	my $pr_reg = $xtw->haspriv(PRIV_REG);
+	my $pr_adm = $xtw->haspriv(PRIV_ADMIN);
+
+	if (open FH, "<", $xtw->dynpath(_GP_LEGEND, REL_SYSROOT)) { # XXX: handle err?
 		local $/;
 		local $_ = <FH>;
-		s/<\/?td.*?>//g;
-		print;
+
+		my @t = split m!(?=<div)!;
+		foreach my $te (@t) {
+			if ($te =~ /(\w+) \((job \d+)\)/) {
+				# Strip account information unless it is this
+				# user's job or this user is admin.
+				$te =~ s/$@/$2/ unless $pr_adm or
+				    ($pr_reg && $1 eq $cgi->remote_user());
+			}
+			print $te;
+		};
 		close FH;
 	}
 }
