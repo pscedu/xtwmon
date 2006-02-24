@@ -14,69 +14,78 @@ our @ISA = qw(Exporter);
 
 our @EXPORT = qw(
 	PRIV_NONE PRIV_REG PRIV_ADMIN
-	hasprivs
-
-	_PATH_LATEST_FINAL
+	haspriv
 
 	_GP_JOBJS _GP_LEGEND _GP_NODEJS _GP_YODJS
-	subst sid_gen sid_valid
+	subst sid_valid
+
+	_PATH_LATEST_FINAL _PATH_SYSROOT _PATH_ARBITER
+
+	REL_SYSROOT REL_WEBROOT
 
 	ZOOM_MIN ZOOM_MAX
 
-	_PATH_SYSROOT
-	REL_SYSROOT REL_WEBROOT
-
 	make_url
-	hl_valid vmode_valid smode_valid
+	hl_valid vmode_valid smode_valid jsdata_valid
+
+	XCF_REQSID
 );
 
 use constant PRIV_NONE		=> 0;
 use constant PRIV_REG		=> 1;
 use constant PRIV_ADMIN		=> 2;
 
-use constant _PATH_LATEST_FINAL	=> "/var/www/html/xtwmon/www/latest";
-
-# Need trailing slash below.
-use constant _PATH_CLI_ROOT	=> "/var/www/html/xtwmon/www/sessions";
-
-use constant _PATH_SYSROOT	=> "/var/www/html/xtwmon/www";
-
-# All paths must be absolute, since mod_perl has strange cwds.
+# "Dynamically generated" (based on client session ID).
 use constant _GP_JOBJS		=> 0;
 use constant _GP_LEGEND		=> 1;
 use constant _GP_NODEJS		=> 2;
 use constant _GP_YODJS		=> 3;
 
+use constant _PATH_SYSROOT	=> "/var/www/html/xtwmon/www";
+use constant _PATH_WEBROOT	=> "/xtwmon/www";
+
+use constant _PATH_LATEST_FINAL	=> "/var/www/html/xtwmon/data/latest";
+use constant _PATH_CLI_ROOT	=> "/var/www/html/xtwmon/data/sessions";
+use constant _PATH_ARBITER	=> "/arbiter.pl";
+
+use constant REL_SYSROOT	=> 0;
+use constant REL_WEBROOT	=> 1;
+
 use constant ZOOM_MAX		=> 100;
 use constant ZOOM_MIN		=> -100;
 
-# strftime(3)
-use constant _PATH_ARCHIVE	=> "/var/www/html/xtwmon/www/data-%Y-%m-%d-tm-%H-%M-%S";
+use constant SID_LEN		=> 12;
 
-use constant REL_SYSROOT => 0;
-use constant REL_WEBROOT => 1;
-
-use constant SID_LEN => 12;
+use constant XCF_REQSID		=> (1<<0);
 
 sub new {
-	my ($class, $sid) = @_;
-	my $cgi = CGI->new;
+	my ($class, %p) = @_;
+	$p{flags} = 0 unless exists $p{flags} and
+	    defined $p{flags} and $p{flags} =~ /^\d+$/;
 
-	$sid = sid_gen() unless sid_valid($sid);
-	return bless {
-		sid		=> $sid,
-		cgi		=> $cgi,
-		admins		=> [qw(dsimmel scott yanovich)],
+	my $obj = bless {
+		cgi	=> $p{cgi},
+		admins	=> [qw(dsimmel scott yanovich)],
 	}, $class;
+	my $sid = $obj->{cgi}->param("sid");
+	if ($obj->sid_valid($sid)) {
+		$obj->{sid} = $sid;
+	} else {
+		# Invalid session ID.
+		exit 0 if $p{flags} & XCF_REQSID;
+		$obj->{sid} = $obj->sid_gen();
+	}
+	return ($obj);
 }
 
-sub hasprivs {
+sub haspriv {
 	my ($obj, $priv) = @_;
 	my $loggedin = (defined $obj->{cgi}->remote_user);
 
 	if ($priv == PRIV_NONE) {
-		return (1);
+		return (!$loggedin);
 	} elsif ($priv == PRIV_REG) {
+		# XXX: should ensure !in_strarray(name, admins)
 		return ($loggedin);
 	} elsif ($priv == PRIV_ADMIN) {
 		if ($loggedin) {
@@ -90,9 +99,13 @@ sub hasprivs {
 
 sub getpath {
 	my ($obj, $res, $rel) = @_;
-	$rel = REL_SYSROOT unless defined $rel;
-	my $prefix = ($rel == REL_WEBROOT) ? "sessions" : _PATH_CLI_ROOT ;
-	return ($prefix . "/" . $obj->{sid} . (
+	my $prefix = ($rel == REL_WEBROOT) ? _PATH_WEBROOT : _PATH_SYSROOT;
+	return ($prefix . $res);
+}
+
+sub dynpath {
+	my ($obj, $res) = @_;
+	return (_PATH_CLI_ROOT . "/" . $obj->{sid} . (
 		"/jobs.js",		# _GP_JOBJS
 		"/legend.html",		# _GP_LEGEND
 		"/nodes.js",		# _GP_NODEJS
@@ -156,7 +169,15 @@ sub smode_valid {
 	return (in_strarray($smode, \@smodes));
 }
 
+sub jsdata_valid {
+	my ($jsdata) = @_;
+	return (0) unless defined $jsdata;
+	my @jsdata = qw( nodes jobs yods );
+	return (in_strarray($jsdata, \@jsdata));
+}
+
 sub sid_gen {
+	my $obj = shift;
 	my $sid;
 	do {
 		$sid = "";
@@ -164,21 +185,21 @@ sub sid_gen {
 			my $ch = int rand 255;
 			$sid .= chr($ch) if chr($ch) =~ /^[a-zA-Z0-9]$/;
 		}
-	} while (sid_valid($sid));
-	sess_create($sid);
+	} while ($obj->sid_valid($sid));
+	$obj->sess_create($sid);
 	return ($sid);
 }
 
 sub sid_valid {
-	my ($sid) = @_;
+	my ($obj, $sid) = @_;
 	return (defined $sid && $sid =~ /^[a-zA-Z0-9]+$/ &&
 	    -d _PATH_CLI_ROOT . "/$sid");
 }
 
 sub sess_create {
-	my ($sid) = @_;
+	my ($obj, $sid) = @_;
 	my $out_dir = _PATH_CLI_ROOT . "/$sid";
-	mkdir $out_dir, 0755; # XXX or die
+	mkdir $out_dir, 0755 or $obj->err("mkdir");
 	find(sub {
 		my $file = $File::Find::name;
 		my $dir = _PATH_LATEST_FINAL;
@@ -186,5 +207,11 @@ sub sess_create {
 		copy($File::Find::name, $file);
 	}, _PATH_LATEST_FINAL);
 }
+
+sub err {
+	my ($obj, @msg) = @_;
+	print @msg, ": $!";
+	exit(1);
+};
 
 1;
