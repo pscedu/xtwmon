@@ -88,7 +88,8 @@ sub _getadmins {
 	my @adm;
 	open F, "<", _PATH_ADMIN or $obj->err(_PATH_ADMIN);
 	while (<F>) {
-		push @adm, split /,/;
+		next if /^\s*(?:#|$)/;
+		push @adm, split /[,\s]/;
 	}
 	close F;
 
