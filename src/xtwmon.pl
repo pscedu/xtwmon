@@ -17,8 +17,8 @@ use constant _PATH_NODE		=> "/home/yanovich/code/proj/xt3dmon/data/node";
 use constant _PATH_JOB		=> "/home/yanovich/code/proj/xt3dmon/data/job";
 use constant _PATH_YOD		=> "/home/yanovich/code/proj/xt3dmon/data/yod";
 
-use constant _PATH_LATEST	=> "/var/www/html/xtwmon/www/latest-tmp";
-use constant _PATH_LATEST_DUMMY	=> "/var/www/html/xtwmon/www/latest-old";
+use constant _PATH_LATEST	=> "/var/www/html/xtwmon/data/latest-tmp";
+use constant _PATH_LATEST_DUMMY	=> "/var/www/html/xtwmon/data/latest-old";
 
 use constant _PATH_JOBJS	=> _PATH_LATEST . "/jobs.js";
 use constant _PATH_LEGEND	=> _PATH_LATEST . "/legend.html";
@@ -242,12 +242,6 @@ sub js_dynlink {
 		qq{</script>};
 }
 
-sub sepcols {
-	my ($pos, $incr) = @_;
-	return $pos == 0 || $pos % $incr ?
-	    "" : q{</td><td width="10%">};
-}
-
 sub write_jobfiles {
 	my ($jobid, $job, $fn);
 	local (*LEGENDF, *JSF);
@@ -275,14 +269,8 @@ JS
 	<br />
 EOF
 
-	my $n = 0; # free, disabled, service
-	my $max = scalar(keys(%jobs)) + $n;
-	my $npercols = int($max / 2 + .5); # 3 columns (2+1)
-
 	foreach $jobid (sort { $a <=> $b } keys %jobs) {
 		$job = $jobs{$jobid};
-
-		print LEGENDF sepcols($n++, $npercols);
 
 		my $col = join ',', @{ $job->{col} };
 		# XXX: owner name and JS characters
@@ -293,7 +281,7 @@ EOF
 	@{[js_dynlink($cgi->escapeHTML($ltext), "mkurl_job($jobid)")]}<br clear="all" />
 HTML
 		print JSF "\n\tj = new Job($jobid)\n";
-		foreach (qw(name owner queue dur_used dur_want ncpus mem yodid)) {
+		foreach (qw(owner name queue dur_used dur_want ncpus mem yodid)) {
 			print JSF "\tj.$_ = '$job->{$_}'\n" if exists $job->{$_};
 		}
 	}
@@ -319,11 +307,7 @@ EOF
 
 	foreach my $node (@invmap) {
 		next unless ref $node eq "HASH";
-
-		print F <<EOF;
-	n = new Node($node->{nid})
-EOF
-
+		print F "\n\tn = new Node($node->{nid})\n";
 		foreach (qw(x y z r cg cb m n jobid st temp)) {
 			print F "\tn.$_ = '$node->{$_}'\n"
 			    if exists $node->{$_};
