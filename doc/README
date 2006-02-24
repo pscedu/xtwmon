@@ -3,19 +3,54 @@ $Id$
 xtwmon README
 =============
 
-Add the following inside a <VirtualHost *.443> block
-of httpd.conf:
+Run the following commands:
+
+	# XTWMON_ROOT=/var/www/html/xtwmon
+
+	# mkdir /tmp/xtsess
+	# chmod +t /tmp/xtsess
+	# mkdir $XTWMON_ROOT/data/sessions
+	# chmod +t $XTWMON_ROOT/data/sessions
+
+Edit the configuration sections of the following scripts
+	$XT3DMON/tools/update.sh
+	$XT3DMON/tools/dump.pl
+	$XT3DMON/tools/update-admin.pl
+
+Plug these into crontab:
+	$XT3DMON/tools/update.sh
+	$XT3DMON/tools/update-admin.pl
+
+Enable Apache's mod_perl for .pl files:
+
+	<Files "*.pl">
+		SetHandler perl-script
+		PerlHandler ModPerl::Registry
+	</Files>
+
+Add the xtwmon library directory $XTWMON/lib to the mod_perl
+include path.  One way to do this is to create a file, say
+/var/www/lib/startup.pl, which contains the following:
+
+	use lib qw($XTWMON/lib);
+
+And place the following in httpd.conf:
+
+	PerlRequire /var/www/lib/startup.pl
+
+Add the following inside a <VirtualHost *.443> block in
+httpd.conf to allow Kerberos logins:
 
 	<Location "/xtwmon">
 		SSLRequireSSL
 		AuthType KerberosV5
 		AuthName "PSC.EDU Kerberos 5"
-#		KrbServiceName HTTP
-#		Krb5AuthRealms PSC.EDU
-#		Krb5Keytab /etc/*.keytab
-#		KrbMethodNegotiate on
-#		KrbMethodK5Password on
+		Krb5Keytab /etc/httpd/conf/keytab
 		Order allow,deny
 		require valid-user
 		Allow from all
 	</Location>
+
+Invoke the xt3dmon server:
+
+	$ xt3dmon/xt3dmon -d
