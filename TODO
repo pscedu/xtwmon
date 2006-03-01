@@ -4,3 +4,4 @@ add a column of job info
 add selnode stuff
 use javascript to flip x,y,z pics instead of page requests
 add a lock file that gets checked so requests don't use half-made files
+remove arbiter-raw.pl
