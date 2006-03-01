@@ -42,8 +42,7 @@ if (jsdata_valid($p{jsdata})) {
 			}
 		} elsif ($p{jsdata} eq "yods") {
 			if (/^\ty\.cmd = /) {
-				next unless $pr_adm or ($pr_reg &&
-				    $cgi->remote_user eq $1);
+				next unless $pr_adm;
 			}
 		}
 		print;
