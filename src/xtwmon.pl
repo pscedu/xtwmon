@@ -13,10 +13,6 @@ use CGI;
 use strict;
 use warnings;
 
-use constant _PATH_NODE		=> "/home/yanovich/code/proj/xt3dmon/data/node";
-use constant _PATH_JOB		=> "/home/yanovich/code/proj/xt3dmon/data/job";
-use constant _PATH_YOD		=> "/home/yanovich/code/proj/xt3dmon/data/yod";
-
 use constant _PATH_LATEST	=> "/var/www/html/xtwmon/data/latest-tmp";
 use constant _PATH_LATEST_DUMMY	=> "/var/www/html/xtwmon/data/latest-old";
 
