@@ -29,7 +29,7 @@ our @EXPORT = qw(
 	make_url
 	hl_valid vmode_valid smode_valid jsdata_valid
 
-	XCF_REQSID
+	XCF_REQSID XCF_NOSID
 );
 
 use constant PRIV_NONE		=> 0;
@@ -63,6 +63,7 @@ use constant ZOOM_MIN		=> -100;
 use constant SID_LEN		=> 12;
 
 use constant XCF_REQSID		=> (1<<0);
+use constant XCF_NOSID		=> (1<<1);
 
 sub new {
 	my ($class, %p) = @_;
@@ -75,13 +76,15 @@ sub new {
 	}, $class;
 	$obj->{admins} = $obj->_getadmins();
 
-	my $sid = $obj->{cgi}->param("sid");
-	if ($obj->sid_valid($sid)) {
-		$obj->{sid} = $sid;
-	} else {
-		# Invalid session ID.
-		exit 0 if $p{flags} & XCF_REQSID;
-		$obj->{sid} = $obj->sid_gen();
+	unless ($p{flags} & XCF_NOSID) {
+		my $sid = $obj->{cgi}->param("sid");
+		if ($obj->sid_valid($sid)) {
+			$obj->{sid} = $sid;
+		} else {
+			# Invalid session ID.
+			exit 0 if $p{flags} & XCF_REQSID;
+			$obj->{sid} = $obj->sid_gen();
+		}
 	}
 	return ($obj);
 }
