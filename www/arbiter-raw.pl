@@ -49,8 +49,15 @@ if (jsdata_valid($p{data})) { # XXX: nothing to do with js
 				}xe;
 			}
 		} elsif ($p{data} eq "yods") {
-			if (/^\ty\.cmd = /) {
-				next unless $pr_adm;
+			unless ($pr_adm) {
+				s{
+					(\d+)	\s+	# yodid		$1
+					(\d+)	\s+	# partid	$2
+					(\d+)	\s+	# ncpus		$3
+					(?:.*?)	\s+	# cmd
+				}{
+					join "\t", $1, $2, $3, "???"
+				}xe;
 			}
 		}
 		print;
