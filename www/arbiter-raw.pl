@@ -54,7 +54,7 @@ if (jsdata_valid($p{data})) { # XXX: nothing to do with js
 					(\d+)	\s+	# yodid		$1
 					(\d+)	\s+	# partid	$2
 					(\d+)	\s+	# ncpus		$3
-					(?:.*?)	\s+	# cmd
+					(?:.*)		# cmd
 				}{
 					join "\t", $1, $2, $3, "???"
 				}xe;
