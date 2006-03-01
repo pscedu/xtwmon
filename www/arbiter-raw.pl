@@ -10,7 +10,7 @@ use warnings;
 my $r = shift;
 $r->content_type('text/javascript');
 my $cgi = CGI->new();
-my $xtw = XTWMon->new(cgi => $cgi, flags => XCF_REQSID);
+my $xtw = XTWMon->new(cgi => $cgi, flags => XCF_NOSID);
 
 my %p;
 $p{data} = $cgi->param("data");
@@ -27,9 +27,6 @@ if (jsdata_valid($p{data})) { # XXX: nothing to do with js
 
 	my $fn = $data{$p{data}};
 	open F, "<", $fn or $xtw->err();
-	my $ok = 0;
-	my $jfilter = "name|queue";
-	my $joblines = "";
 	while (<F>) {
 		if ($p{data} eq "jobs") {
 			/^(?:\d+)\s+(\w+)/ or next;
