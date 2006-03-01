@@ -11,6 +11,7 @@ Run the following commands:
 	# chmod +t /tmp/xtsess
 	# mkdir $XTWMON_ROOT/data/sessions
 	# chmod +t $XTWMON_ROOT/data/sessions
+	# mkdir $XTWMON_ROOT/data/latest
 
 Edit the configuration sections of the following scripts
 	$XT3DMON/tools/update.sh
