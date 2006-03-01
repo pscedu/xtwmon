@@ -138,7 +138,6 @@ sub parse_nodes {
 
 sub parse_yods {
 	local ($_, *YODFH);
-	my $eof;
 
 	open YODFH, "< " . _PATH_YOD or err(_PATH_YOD);
 	while (<YODFH>) {
@@ -156,39 +155,19 @@ sub parse_yods {
 
 sub parse_jobs {
 	local ($_, *JOBFH);
-	my $eof;
 
-	my %j = (state => "", id => 0);
 	open JOBFH, "< " . _PATH_JOB or err(_PATH_JOB);
-	for (;;) {
-		$eof = eof JOBFH;
-		defined($_ = <JOBFH>) && chomp;
-		if ($eof or /^Job Id: (\d+)/) {
-			# Save old job
-			if ($j{state} eq 'R' && exists $jobs{$j{id}}) {
-				@{ $jobs{$j{id}} }{keys %j} = values %j;
-			}
-			last if $eof;
-			# Set up next job
-			%j = (id => $1, state => "");
-		} elsif (/^\s*Job_Name = /) {
-			$j{name} = $';
-		} elsif (/^\s*Job_Owner = (.*?)/) { # XXX
-			$j{owner} = $';
-			$j{owner} =~ s/@.*//;
-		} elsif (/^\s*job_state = (.)/) {
-			$j{state} = $1;
-		} elsif (/^\s*queue = /) {
-			$j{queue} = $';
-		} elsif (/^\s*Resource_List\.size = (\d+)/) {
-			$j{ncpus} = $1;
-		} elsif (/^\s*Resource_List\.walltime = (\d\d):(\d\d)/) {
-			$j{dur_want} = $1 * 60 + $2;
-		} elsif (/^\s*resources_used\.walltime = (\d\d):(\d\d)/) {
-			$j{dur_used} = $1 * 60 + $2;
-		} elsif (/^\s*resources_used\.mem = (\d+)kb/) {
-			$j{mem} = $1;
-		}
+	while (<JOBFH>) {
+		chomp;
+		my ($j_id, $j_owner, $j_tmdur, $j_tmuse, $j_mem,
+		    $j_ncpus, $j_queue, $j_name) = split /\s+/, $_, 8;
+		$jobs{$j_id}{name}	= $j_name;
+		$jobs{$j_id}{owner}	= $j_owner;
+		$jobs{$j_id}{queue}	= $j_queue;
+		$jobs{$j_id}{ncpus}	= $j_ncpus;
+		$jobs{$j_id}{dur_want}	= $j_tmdur;
+		$jobs{$j_id}{dur_used}	= $j_tmuse;
+		$jobs{$j_id}{mem}	= $j_mem;
 	}
 	close JOBFH;
 }
