@@ -8,7 +8,7 @@ use strict;
 use warnings;
 
 my $r = shift;
-$r->content_type('text/javascript');
+$r->content_type('text/plain');
 my $cgi = CGI->new();
 my $xtw = XTWMon->new(cgi => $cgi, flags => XCF_NOSID);
 
