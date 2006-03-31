@@ -153,15 +153,15 @@ print <<EOF;
 		<table border="0" cellspacing="0" cellpadding="0">
 			<tr valign="top">
 				<td>
-						<a href="$urls{temp}"><img alt="[temp]"  src="img/temp.png" $img_attr /></a><br />
-						<a href="$urls{jobs}"><img alt="[jobs]"  src="img/jobs.png" $img_attr /></a><br />
-						<a href="$urls{wired}"><img alt="[wired]" src="img/wired.png" $img_attr /></a><br />
-						<a href="$urls{phys}"><img alt="[phys]"  src="img/phys.png" $img_attr /></a><br />
-						<a href="$urls{reload}"><img alt="[reload]" src="img/reload.png" $img_attr /></a><br />
-						<!-- img alt="[pan]" usemap="#pan" src="img/pan.png" $img_attr / -->
-						<img alt="[zoom]" usemap="#zoom" src="img/zoom.png" $img_attr /><br />
-						<img alt="[horz]" usemap="#horz" src="img/rot-horz.png" $img_attr /><br />
-						<img alt="[vert]" usemap="#vert" src="img/rot-vert.png" $img_attr /></td>
+					<a href="$urls{temp}"><img alt="[temp]"  src="img/temp.png" $img_attr /></a><br />
+					<a href="$urls{jobs}"><img alt="[jobs]"  src="img/jobs.png" $img_attr /></a><br />
+					<a href="$urls{wired}"><img alt="[wired]" src="img/wired.png" $img_attr /></a><br />
+					<a href="$urls{phys}"><img alt="[phys]"  src="img/phys.png" $img_attr /></a><br />
+					<a href="$urls{reload}"><img alt="[reload]" src="img/reload.png" $img_attr /></a><br />
+					<!-- img alt="[pan]" usemap="#pan" src="img/pan.png" $img_attr / -->
+					<img alt="[zoom]" usemap="#zoom" src="img/zoom.png" $img_attr /><br />
+					<img alt="[horz]" usemap="#horz" src="img/rot-horz.png" $img_attr /><br />
+					<img alt="[vert]" usemap="#vert" src="img/rot-vert.png" $img_attr /></td>
 				<td>
 				 <a href="${click_url}click="><img alt="[3d]" border="0" src="$plot_url"
 				  width="$p_w" height="$p_h" ismap="ismap"
