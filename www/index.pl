@@ -40,25 +40,43 @@ delete $p{hl} unless hl_valid($p{hl});
 $p{vmode} = "wiredone" unless vmode_valid($p{vmode});
 $p{smode} = "jobs" unless smode_valid($p{smode});
 
-my $tp = ($p{t} - 30) % 360;
-my $tn = ($p{t} + 30) % 360;
-my $pp = ($p{p} - 20) % 360;
-my $pn = ($p{p} + 20) % 360;
-my $zp = $p{z} - 20;
-my $zn = $p{z} + 20;
+my %np = (
+	tpbg => ($p{t} - 30) % 360,
+	tnbg => ($p{t} + 30) % 360,
+	ppbg => ($p{p} - 20) % 360,
+	pnbg => ($p{p} + 20) % 360,
+	zpbg => $p{z} - 20,
+	znbg => $p{z} + 20,
+
+	tpsm => ($p{t} - 15) % 360,
+	tnsm => ($p{t} + 15) % 360,
+	ppsm => ($p{p} - 10) % 360,
+	pnsm => ($p{p} + 10) % 360,
+	zpsm => $p{z} - 10,
+	znsm => $p{z} + 10,
+);
 
 # Bounds.
-$pp = 270 if $p{p} >= 270 && $pp < 270;
-$pn =  90 if $p{p} <=  90 && $pn >  90;
+$np{ppbg} = 270 if $p{p} >= 270 && $np{ppbg} < 270;
+$np{pnbg} =  90 if $p{p} <=  90 && $np{pnbg} >  90;
+
+$np{ppsm} = 270 if $p{p} >= 270 && $np{ppsm} < 270;
+$np{pnsm} =  90 if $p{p} <=  90 && $np{pnsm} >  90;
 
 $p{z} = ZOOM_MAX if $p{z} > ZOOM_MAX;
 $p{z} = ZOOM_MIN if $p{z} < ZOOM_MIN;
 
-$zp = ZOOM_MAX if $zp > ZOOM_MAX;
-$zp = ZOOM_MIN if $zp < ZOOM_MIN;
+$np{zpbg} = ZOOM_MAX if $np{zpbg} > ZOOM_MAX;
+$np{zpbg} = ZOOM_MIN if $np{zpbg} < ZOOM_MIN;
 
-$zn = ZOOM_MAX if $zn > ZOOM_MAX;
-$zn = ZOOM_MIN if $zn < ZOOM_MIN;
+$np{zpsm} = ZOOM_MAX if $np{zpsm} > ZOOM_MAX;
+$np{zpsm} = ZOOM_MIN if $np{zpsm} < ZOOM_MIN;
+
+$np{znbg} = ZOOM_MAX if $np{znbg} > ZOOM_MAX;
+$np{znbg} = ZOOM_MIN if $np{znbg} < ZOOM_MIN;
+
+$np{znsm} = ZOOM_MAX if $np{znsm} > ZOOM_MAX;
+$np{znsm} = ZOOM_MIN if $np{znsm} < ZOOM_MIN;
 
 $p{job} = $cgi->param('job');
 $p{job} = 0 unless $p{job} && $p{job} =~ /^\d+$/;
@@ -69,12 +87,19 @@ $p{job} = 0 unless $p{job} && $p{job} =~ /^\d+$/;
 my $uri = $r->uri;
 
 my %url_view = (
-	left	=> make_url($uri, \%p, t => $tn),
-	right	=> make_url($uri, \%p, t => $tp),
-	up	  => make_url($uri, \%p, p => $pn),
-	down  => make_url($uri, \%p, p => $pp),
-	forw  => make_url($uri, \%p, z => $zn),
-	back  => make_url($uri, \%p, z => $zp),
+	bg_back	=> make_url($uri, \%p, z => $np{zpbg}),
+	bg_down	=> make_url($uri, \%p, p => $np{ppbg}),
+	bg_forw	=> make_url($uri, \%p, z => $np{znbg}),
+	bg_left	=> make_url($uri, \%p, t => $np{tnbg}),
+	bg_right=> make_url($uri, \%p, t => $np{tpbg}),
+	bg_up		=> make_url($uri, \%p, p => $np{pnbg}),
+
+	sm_back	=> make_url($uri, \%p, z => $np{zpsm}),
+	sm_down	=> make_url($uri, \%p, p => $np{ppsm}),
+	sm_forw	=> make_url($uri, \%p, z => $np{znsm}),
+	sm_left	=> make_url($uri, \%p, t => $np{tnsm}),
+	sm_right=> make_url($uri, \%p, t => $np{tpsm}),
+	sm_up		=> make_url($uri, \%p, p => $np{pnsm}),
 );
 
 my %js_p;
@@ -108,16 +133,22 @@ $r->print(<<EOF);
 	</head>
 	<body>
 		<map name="zoom">
-			<area href="$url_view{back}" shape="rect" alt="zoom out" coords="0,35,71,71" />
-			<area href="$url_view{forw}" shape="rect" alt="zoom in" coords="0,0,71,34" />
+			<area href="$url_view{bg_forw}" shape="rect" alt="zoom in" coords="0,0,71,17" />
+			<area href="$url_view{sm_forw}" shape="rect" alt="zoom in" coords="0,18,71,35" />
+			<area href="$url_view{sm_back}" shape="rect" alt="zoom out" coords="0,36,71,53" />
+			<area href="$url_view{bg_back}" shape="rect" alt="zoom out" coords="0,54,71,71" />
 		</map>
 		<map name="horz">
-			<area href="$url_view{left}" shape="rect" alt="rotate left" coords="37,0,71,71" />
-			<area href="$url_view{right}" shape="rect" alt="rotate right" coords="0,0,36,71" />
+			<area href="$url_view{bg_right}" shape="rect" alt="rotate right" coords="0,0,17,71" />
+			<area href="$url_view{sm_right}" shape="rect" alt="rotate right" coords="18,0,35,71" />
+			<area href="$url_view{sm_left}" shape="rect" alt="rotate left" coords="36,0,53,71" />
+			<area href="$url_view{bg_left}" shape="rect" alt="rotate left" coords="54,0,71,71" />
 		</map>
 		<map name="vert">
-			<area href="$url_view{up}" shape="rect" alt="rotate up" coords="0,36,71,71" />
-			<area href="$url_view{down}" shape="rect" alt="rotate down" coords="0,0,71,35" />
+			<area href="$url_view{bg_down}" shape="rect" alt="rotate down" coords="0,0,71,17" />
+			<area href="$url_view{sm_down}" shape="rect" alt="rotate down" coords="0,18,71,35" />
+			<area href="$url_view{sm_up}" shape="rect" alt="rotate up" coords="0,36,71,53" />
+			<area href="$url_view{bg_up}" shape="rect" alt="rotate up" coords="0,54,71,71" />
 		</map>
 EOF
 
