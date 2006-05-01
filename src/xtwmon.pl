@@ -104,11 +104,12 @@ sub parse_nodes {
 
 		my $r_job = job_get($jobid);
 		if (ref $r_job eq "HASH") {
+			$state = ST_USED;
 			$r_job->{yodid} = $yodid; # XXX
 			$r_job->{cnt}++;
-		} else {
-			$statecnt[$state]++;
+			$color = $r_job->{col};
 		}
+		$statecnt[$state]++;
 
 		$nodes[$x]	= [] unless ref $nodes[$x]	eq "ARRAY";
 		$nodes[$x][$y]	= [] unless ref $nodes[$x][$y]	eq "ARRAY";
@@ -130,12 +131,6 @@ sub parse_nodes {
 			temp	=> $temp,
 			nfails	=> $nfails,
 		};
-
-		if ($jobid) {
-			$state = ST_USED;
-			$node->{col} = \$node->{job}{col};
-		}
-
 	}
 	close NODEFH;
 
@@ -252,8 +247,8 @@ JS
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_SVC] }]});"></div>
 	@{[js_dynlink("Service ($statecnt[ST_SVC])", "mkurl_hl('service')")]}<br clear="all" />
 	<div class="job" style="border-color: white"></div>
-	@{[js_dynlink("Show all jobs", "mkurl_job(0)")]}<br clear="all" />
-	<br />
+	@{[js_dynlink("Show all nodes", "mkurl_job(0)")]}<br clear="all" />
+	<br />Nodes allocated: $statecnt[ST_USED]<br />
 EOF
 
 	foreach $jobid (sort { $a <=> $b } keys %jobs) {
