@@ -40,6 +40,14 @@ my @statecol = (
 	[255, 255,   0],	# SVC
 );
 
+my @statecnt = (
+	0,			# FREE
+	0,			# DOWN
+	0,			# DISABLED
+	0,			# USED
+	0,			# SVC
+);
+
 # end config
 
 my %stmap = (
@@ -96,7 +104,10 @@ sub parse_nodes {
 
 		my $r_job = job_get($jobid);
 		if (ref $r_job eq "HASH") {
-			$r_job->{yodid} = $yodid;
+			$r_job->{yodid} = $yodid; # XXX
+			$r_job->{cnt}++;
+		} else {
+			$statecnt[$state]++;
 		}
 
 		$nodes[$x]	= [] unless ref $nodes[$x]	eq "ARRAY";
@@ -177,7 +188,8 @@ sub job_get {
 	return undef unless $jobid;
 	return $jobs{$jobid} if $jobs{$jobid};
 	$jobs{$jobid} = {
-		id => $jobid,
+		id  => $jobid,
+		cnt => 0,
 	};
 }
 
@@ -232,13 +244,13 @@ JS
 	open LEGENDF, "> $fn" or err($fn);
 	print LEGENDF <<EOF;
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_FREE] }]});"></div>
-	@{[js_dynlink("Free", "mkurl_hl('free')")]}<br clear="all" />
+	@{[js_dynlink("Free ($statecnt[ST_FREE])", "mkurl_hl('free')")]}<br clear="all" />
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_DOWN] }]});"></div>
-	@{[js_dynlink("Down (CPA)", "mkurl_hl('down')")]}<br clear="all" />
+	@{[js_dynlink("Down/CPA ($statecnt[ST_DOWN])", "mkurl_hl('down')")]}<br clear="all" />
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_DISABLED] }]});"></div>
-	@{[js_dynlink("Disabled (PBS)", "mkurl_hl('disabled')")]}<br />
+	@{[js_dynlink("Disabled/PBS ($statecnt[ST_DISABLED])", "mkurl_hl('disabled')")]}<br />
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_SVC] }]});"></div>
-	@{[js_dynlink("Service", "mkurl_hl('service')")]}<br clear="all" />
+	@{[js_dynlink("Service ($statecnt[ST_SVC])", "mkurl_hl('service')")]}<br clear="all" />
 	<div class="job" style="border-color: white"></div>
 	@{[js_dynlink("Show all jobs", "mkurl_job(0)")]}<br clear="all" />
 	<br />
@@ -249,8 +261,20 @@ EOF
 
 		my $col = join ',', @{ $job->{col} };
 		# XXX: owner name and JS characters
-		my $ltext = defined $job->{owner} ?
-		    "$job->{owner} (job $job->{id})" : "job $job->{id}";
+		my $ltext;
+
+		my $lncpus = (exists $job->{ncpus} && defined $job->{ncpus} ?
+		    $job->{ncpus} : "?");
+		if (exists $job->{owner} && defined $job->{owner}) {
+			if (exists $job->{name} && defined $job->{name}) {
+				$ltext = "$job->{owner}/$job->{name} ($lncpus)";
+			} else {
+				$ltext = "$job->{owner}/$job->{id} ($lncpus)";
+			}
+		} else {
+			$ltext = "job $job->{id} ($lncpus)";
+		}
+
 		print LEGENDF <<HTML;
 	<div class="job" style="background-color: rgb($col);"></div>
 	@{[js_dynlink($cgi->escapeHTML($ltext), "mkurl_job($jobid)")]}<br clear="all" />
