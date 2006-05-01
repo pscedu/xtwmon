@@ -33,9 +33,9 @@ function selnode() {
 			    n.x + ',' + n.y + ',' + n.z + ')'
 
 		if (n.r && n.cb && n.cg && n.m && n.n)
-			pl.innerHTML += '<br />Physical position: (' +
-			    n.r + ',' + n.cb + ',' + n.cg + ',' +
-			    n.m + ',' + n.n + ')'
+			pl.innerHTML += '<br />Hardware name: c' +
+			    n.cb + '-' + n.r + 'c' + n.cg + 's' +
+			    n.m + 's' + n.n
 
 		if (Number(n.jobid))
 			pl.innerHTML += '<br />Job ID: ' + n.jobid + ' (' +
