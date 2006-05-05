@@ -65,6 +65,15 @@ parse_nodes();
 parse_jobs();
 parse_yods();
 
+{
+	my @keys = sort { $a <=> $b } keys %jobs;
+	my $len = scalar @keys;
+	my $t = 0;
+	foreach my $j (@keys) {
+		$jobs{$j}{col} = col_get($t++, $len);
+	}
+}
+
 mkdir $out_dir, 0755 || err("mkdir: $out_dir");
 
 write_yodfiles();
@@ -133,13 +142,6 @@ sub parse_nodes {
 		};
 	}
 	close NODEFH;
-
-	my @keys = sort { $a <=> $b } keys %jobs;
-	my $len = scalar @keys;
-	my $t = 0;
-	foreach my $j (@keys) {
-		$jobs{$j}{col} = col_get($t++, $len);
-	}
 }
 
 sub parse_yods {
@@ -255,24 +257,22 @@ EOF
 		$job = $jobs{$jobid};
 
 		my $col = join ',', @{ $job->{col} };
-		# XXX: owner name and JS characters
-		my $ltext;
 
 		my $lncpus = (exists $job->{ncpus} && defined $job->{ncpus} ?
 		    $job->{ncpus} : "?");
-		if (exists $job->{owner} && defined $job->{owner}) {
-			if (exists $job->{name} && defined $job->{name}) {
-				$ltext = "$job->{owner}/$job->{name} ($lncpus)";
-			} else {
-				$ltext = "$job->{owner}/$job->{id} ($lncpus)";
-			}
-		} else {
-			$ltext = "job $job->{id} ($lncpus)";
-		}
+
+		# XXX: owner name and JS characters
+		my $ltext = q{'} . <<EOJS . q{'};
+	+ (jobs[$jobid].owner ?
+		(jobs[$jobid].name ?
+			jobs[$jobid].owner + '/' + jobs[$jobid].name + ' ($lncpus)' :
+			jobs[$jobid].owner + '/$jobid ($lncpus)') :
+		'job $jobid ($lncpus)') +
+EOJS
 
 		print LEGENDF <<HTML;
 	<div class="job" style="background-color: rgb($col);"></div>
-	@{[js_dynlink($cgi->escapeHTML($ltext), "mkurl_job($jobid)")]}<br clear="all" />
+	@{[js_dynlink($ltext, "mkurl_job($jobid)")]}<br clear="all" />
 HTML
 		print JSF "\n\tj = new Job($jobid)\n";
 		foreach (qw(owner name queue dur_used dur_want ncpus mem yodid)) {
