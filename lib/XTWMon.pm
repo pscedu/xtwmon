@@ -43,7 +43,6 @@ use constant _GP_NODEJS		=> 2;
 use constant _GP_YODJS		=> 3;
 
 use constant _PATH_SYSROOT	=> "/var/www/html/xtwmon/www";
-use constant _PATH_WEBROOT	=> "/xtwmon/www";
 
 use constant _PATH_NODE		=> "/home/yanovich/code/proj/xt3dmon/data/node";
 use constant _PATH_JOB		=> "/home/yanovich/code/proj/xt3dmon/data/job";
@@ -125,7 +124,9 @@ sub haspriv {
 
 sub getpath {
 	my ($obj, $res, $rel) = @_;
-	my $prefix = ($rel == REL_WEBROOT) ? _PATH_WEBROOT : _PATH_SYSROOT;
+	my $webroot = (exists $ENV{HTTP_HOST} &&
+	    $ENV{HTTP_HOST} =~ /bigben-monitor/) ? "" : "/xtwmon/www";
+	my $prefix = ($rel == REL_WEBROOT) ? $webroot : _PATH_SYSROOT;
 	return ($prefix . $res);
 }
 
