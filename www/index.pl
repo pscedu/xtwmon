@@ -215,20 +215,20 @@ EOF
 
 if (($p{smode} || "") eq "temp") {
 	print <<EOF;
-					<div class="job" style="background-color: rgb(255,153,153)"></div>75-80C <br clear="all" />
-					<div class="job" style="background-color: rgb(255,0,0)    "></div>71-75C <br clear="all" />
-					<div class="job" style="background-color: rgb(255,153,0)  "></div>66-71C <br clear="all" />
-					<div class="job" style="background-color: rgb(255,204,51) "></div>62-66C <br clear="all" />
-					<div class="job" style="background-color: rgb(255,255,0)  "></div>57-62C <br clear="all" />
-					<div class="job" style="background-color: rgb(102,255,0)  "></div>53-57C <br clear="all" />
-					<div class="job" style="background-color: rgb(0,204,0)    "></div>49-53C <br clear="all" />
-					<div class="job" style="background-color: rgb(0,153,153)  "></div>44-49C <br clear="all" />
-					<div class="job" style="background-color: rgb(0,0,255)    "></div>40-44C <br clear="all" />
-					<div class="job" style="background-color: rgb(51,51,255)  "></div>35-40C <br clear="all" />
-					<div class="job" style="background-color: rgb(102,0,204)  "></div>31-35C <br clear="all" />
-					<div class="job" style="background-color: rgb(153,0,153)  "></div>26-31C <br clear="all" />
-					<div class="job" style="background-color: rgb(204,0,102)  "></div>22-26C <br clear="all" />
-					<div class="job" style="background-color: rgb(0,0,102)    "></div>18-22C <br clear="all" />
+					<div class="job" style="background-color: rgb(  0,  0,102)"></div>&lt;22C <br clear="all" />
+					<div class="job" style="background-color: rgb(  0,  0,204)"></div>22-25C <br clear="all" />
+					<div class="job" style="background-color: rgb(  0,  0,255)"></div>26-29C <br clear="all" />
+					<div class="job" style="background-color: rgb(  0,153,255)"></div>30-33C <br clear="all" />
+					<div class="job" style="background-color: rgb(  0,204,255)"></div>34-37C <br clear="all" />
+					<div class="job" style="background-color: rgb(  0,255,255)"></div>38-41C <br clear="all" />
+					<div class="job" style="background-color: rgb(204,255,255)"></div>42-45C <br clear="all" />
+					<div class="job" style="background-color: rgb(255,255,255)"></div>46-49C <br clear="all" />
+					<div class="job" style="background-color: rgb(255,255,153)"></div>50-53C <br clear="all" />
+					<div class="job" style="background-color: rgb(255,255,  0)"></div>54-57C <br clear="all" />
+					<div class="job" style="background-color: rgb(255,204,  0)"></div>58-61C <br clear="all" />
+					<div class="job" style="background-color: rgb(255,153,  0)"></div>62-65C <br clear="all" />
+					<div class="job" style="background-color: rgb(255,102,  0)"></div>66-69C <br clear="all" />
+					<div class="job" style="background-color: rgb(255,  0,  0)"></div>&gt;69C <br clear="all" />
 EOF
 } else {
 	my $pr_reg = $xtw->haspriv(PRIV_REG);
