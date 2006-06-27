@@ -27,6 +27,7 @@ if (jsdata_valid($p{data})) { # XXX: nothing to do with js
 
 	my $fn = $data{$p{data}};
 	open F, "<", $fn or $xtw->err();
+	$r->set_last_modified((stat $fn)[9]); # 9 = mtime
 	while (<F>) {
 		if ($p{data} eq "jobs") {
 			/^(?:\d+)\s+(\w+)/ or next;
