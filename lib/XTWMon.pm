@@ -19,7 +19,7 @@ our @EXPORT = qw(
 	_GP_JOBJS _GP_LEGEND _GP_NODEJS _GP_YODJS
 	subst sid_valid
 
-	_PATH_NODE _PATH_JOB _PATH_YOD
+	_PATH_NODE _PATH_JOB _PATH_YOD _PATH_COLORS
 	_PATH_LATEST_FINAL _PATH_SYSROOT _PATH_ARBITER
 
 	REL_SYSROOT REL_WEBROOT
@@ -47,6 +47,7 @@ use constant _PATH_SYSROOT	=> "/var/www/html/xtwmon/www";
 use constant _PATH_NODE		=> "/home/yanovich/code/proj/xt3dmon/data/node";
 use constant _PATH_JOB		=> "/home/yanovich/code/proj/xt3dmon/data/job";
 use constant _PATH_YOD		=> "/home/yanovich/code/proj/xt3dmon/data/yod";
+use constant _PATH_COLORS	=> "/home/yanovich/code/proj/xt3dmon/data/colors";
 
 use constant _PATH_LATEST_FINAL	=> "/var/www/html/xtwmon/data/latest";
 use constant _PATH_CLI_ROOT	=> "/var/www/html/xtwmon/data/sessions";
