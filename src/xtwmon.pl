@@ -56,21 +56,21 @@ my %stmap = (
 	i => ST_SVC,
 );
 
+my @colors;
 my @nodes;
 my @invmap;
 my %jobs;
 my %yods;
 
+parse_colors();
 parse_nodes();
 parse_jobs();
 parse_yods();
 
 {
 	my @keys = sort { $a <=> $b } keys %jobs;
-	my $len = scalar @keys;
-	my $t = 0;
-	foreach my $j (@keys) {
-		$jobs{$j}{col} = col_get($t++, $len);
+	foreach my $k (keys %jobs) {
+		$jobs{$k}{col} = col_get($k);
 	}
 }
 
@@ -90,6 +90,18 @@ exit;
 sub err {
 	(my $progname = $0) =~ s!.*/!!;
 	die("$progname: " . join('', @_) . ": $!\n");
+}
+
+sub parse_colors {
+	local ($_, *COLFH);
+
+	open COLFH, "< " . _PATH_COLORS or err(_PATH_COLORS);
+	while (<COLFH>) {
+		my @nums = /(\d+)/g;
+		next unless @nums >= 3;
+		push @colors, [ @nums[0 .. 2] ];
+	}
+	close COLFH;
 }
 
 sub parse_nodes {
@@ -316,19 +328,8 @@ EOF
 }
 
 sub col_get {
-	my ($pos, $tot) = @_;
-	my ($hinc, $vinc, $sinc);
-	my ($h, $s, $v);
-
-	$hinc = 360 / $tot;
-	$sinc = (SAT_MAX - SAT_MIN) / $tot;
-	$vinc = (VAL_MAX - VAL_MIN) / $tot;
-
-	$h = $hinc * $pos + HUE_MIN;
-	$s = $sinc * $pos + SAT_MIN;
-	$v = $vinc * $pos + VAL_MIN;
-
-	return (XTWMon::Color::HSV2RGB($h, $s, $v));
+	my ($id) = @_;
+	return $colors[$id % @colors];
 }
 
 sub col_lookup {
