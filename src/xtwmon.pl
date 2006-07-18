@@ -256,8 +256,6 @@ JS
 	@{[js_dynlink("Free ($statecnt[ST_FREE])", "mkurl_hl('free')")]}<br clear="all" />
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_DOWN] }]});"></div>
 	@{[js_dynlink("Down/CPA ($statecnt[ST_DOWN])", "mkurl_hl('down')")]}<br clear="all" />
-	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_DISABLED] }]});"></div>
-	@{[js_dynlink("Disabled/PBS ($statecnt[ST_DISABLED])", "mkurl_hl('disabled')")]}<br />
 	<div class="job" style="background-color: rgb(@{[join ',', @{ $statecol[ST_SVC] }]});"></div>
 	@{[js_dynlink("Service ($statecnt[ST_SVC])", "mkurl_hl('service')")]}<br clear="all" />
 	<div class="job" style="border-color: white"></div>
