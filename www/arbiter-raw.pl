@@ -40,13 +40,13 @@ if (jsdata_valid($p{data})) { # XXX: nothing to do with js
 					(?:.*?)	\s+	# owner
 					(\d+)	\s+	# tmdur		$2
 					(\d+)	\s+	# tmuse		$3
-					(\d+)	\s+	# mem		$4
-					(\d+)	\s+	# ncpus		$5
+					(?:\d+)	\s+	# mem
+					(\d+)	\s+	# ncpus		$4
 					(?:.*?)	\s+	# queue
 					(?:.*)		# name
 				}{
 					join "\t", $1, "???", $2, $3,
-					    $4, $5, "???", "???"
+					    0, $5, "???", "???"
 				}xe;
 			}
 		} elsif ($p{data} eq "yods") {

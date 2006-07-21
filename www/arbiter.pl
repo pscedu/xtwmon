@@ -28,7 +28,7 @@ if (jsdata_valid($p{jsdata})) {
 	my $fn = $xtw->dynpath($jsdata{$p{jsdata}});
 	open JS, "<", $fn or $xtw->err();
 	my $ok = 0;
-	my $jfilter = "name|queue";
+	my $jfilter = "name|queue|mem";
 	while (<JS>) {
 		if ($p{jsdata} eq "jobs") {
 			if (/^\tj = new Job/) {
