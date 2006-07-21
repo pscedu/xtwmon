@@ -46,7 +46,7 @@ if (jsdata_valid($p{data})) { # XXX: nothing to do with js
 					(?:.*)		# name
 				}{
 					join "\t", $1, "???", $2, $3,
-					    0, $5, "???", "???"
+					    0, $4, "???", "???"
 				}xe;
 			}
 		} elsif ($p{data} eq "yods") {
