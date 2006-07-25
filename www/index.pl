@@ -118,7 +118,7 @@ $r->print(<<EOF);
 
 <html lang="en-US" xml:lang="en-US" xmlns="http://www.w3.org/1999/xhtml">
 	<head>
-		<title>Wired XT3 Monitor</title>
+		<title>BigBen XT3 Monitor</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 		<link rel="stylesheet" type="text/css" href="main.css" media="screen" />
 		<script type="text/javascript">
