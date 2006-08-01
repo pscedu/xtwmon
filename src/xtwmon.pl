@@ -110,13 +110,20 @@ sub parse_nodes {
 	open NODEFH, "< " . _PATH_NODE or err(_PATH_NODE);
 	while (<NODEFH>) {
 		s/^\s+//;
-		next if /^#/;
+		next if /^[#@]/;
 		next unless $_;
 
-		# nid	r cb cg m n	x y z	stat	enabled	jobid	temp	yodid	nfails
-		# 0	0 0  0  0 0	0 0 0	i	1	0	27	0	0
+		my @fields = split /\s+/, $_;
+		unless (@fields == 16) {
+			printf STDERR "%s:$.: malformed line: %s",
+			    _PATH_NODE, $_;
+			next;
+		}
+
+		# nid	r cb cg m n	x y z	stat	enabled	jobid	temp	yodid	nfails	lustat
+		# 0	0 0  0  0 0	0 0 0	i	1	0	27	0	0	c
 		my ($nid, $r, $cb, $cg, $m, $n, $x, $y, $z, $st, $enabled,
-		    $jobid, $temp, $yodid, $nfails) = split /\s+/, $_;
+		    $jobid, $temp, $yodid, $nfails, $lustat) = @fields;
 
 		my $state = $stmap{$st};
 		$state = ST_DISABLED if $state eq ST_FREE and not $enabled;
