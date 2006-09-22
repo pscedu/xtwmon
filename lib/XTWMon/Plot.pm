@@ -50,6 +50,11 @@ sub new {
 
 sub reterr {
 	my $obj = shift;
+	# XXX If this session is new, delete it
+	# XXX since xt3dmon may not have made
+	# XXX the client session data files, which
+	# XXX will make all subsequent requests on
+	# XXX this session crash.
 	warn "xtwmon plot: ", @_, ": $!\n";
 	open FP, "<" . _PATH_ERRORIMG or $obj->err(@_);
 	print <FP>;
