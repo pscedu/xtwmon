@@ -15,6 +15,9 @@ my $xtw = XTWMon->new(cgi => $cgi, flags => XCF_NOSID);
 my %p;
 $p{data} = $cgi->param("data");
 
+# XXX: nasty hack
+$p{data} .= "s" unless defined $p{data} && $p{data} =~ /s$/;
+
 if (jsdata_valid($p{data})) { # XXX: nothing to do with js
 	my %data = (
 		jobs	=> _PATH_JOB,
