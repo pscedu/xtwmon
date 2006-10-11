@@ -42,8 +42,10 @@ function selnode() {
 			    '<a href="' + mkurl_job(n.jobid) +
 			    '">View only this job</a>)'
 
-		if (n.temp)
+		if (n.temp && Number(n.temp))
 			pl.innerHTML += '<br />Temperature: ' + n.temp + '&deg;C'
+		else
+			pl.innerHTML += '<br />Temperature: N/A'
 	}
 }
 
