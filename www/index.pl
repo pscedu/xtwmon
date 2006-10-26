@@ -172,12 +172,12 @@ my %p_reload = %p;
 delete $p_reload{sid};
 
 my %urls = (
-	temp	=> make_url($uri, \%p_smode, smode => "temp"),
-	jobs	=> make_url($uri, \%p_smode, smode => "jobs"),
-	wired	=> make_url($uri, \%p, vmode => "wiredone"),
-	phys	=> make_url($uri, \%p, vmode => "physical"),
+	temp	 => make_url($uri, \%p_smode, smode => "temp"),
+	jobs	 => make_url($uri, \%p_smode, smode => "jobs"),
+	wired	 => make_url($uri, \%p, vmode => "wiredone"),
+	phys	 => make_url($uri, \%p, vmode => "physical"),
 	reload => make_url($uri, \%p_reload),
-	login => make_url($uri, \%p),
+	login  => make_url($uri, \%p),
 );
 $urls{login} = "https://" . $cgi->server_name() . $urls{login};
 
@@ -185,10 +185,10 @@ print <<EOF;
 		<table border="0" cellspacing="0" cellpadding="0">
 			<tr valign="top">
 				<td>
-					<a href="$urls{temp}"><img alt="[temp]"  src="img/temp.png" $img_attr /></a><br />
-					<a href="$urls{jobs}"><img alt="[jobs]"  src="img/jobs.png" $img_attr /></a><br />
-					<a href="$urls{wired}"><img alt="[wired]" src="img/wired.png" $img_attr /></a><br />
-					<a href="$urls{phys}"><img alt="[phys]"  src="img/phys.png" $img_attr /></a><br />
+					<a href="$urls{temp}"><img   alt="[temp]"   src="img/temp.png"   $img_attr /></a><br />
+					<a href="$urls{jobs}"><img   alt="[jobs]"   src="img/jobs.png"   $img_attr /></a><br />
+					<a href="$urls{wired}"><img  alt="[wired]"  src="img/wired.png"  $img_attr /></a><br />
+					<a href="$urls{phys}"><img   alt="[phys]"   src="img/phys.png"   $img_attr /></a><br />
 					<a href="$urls{reload}"><img alt="[reload]" src="img/reload.png" $img_attr /></a><br />
 					<!-- img alt="[pan]" usemap="#pan" src="img/pan.png" $img_attr / -->
 					<img alt="[zoom]" usemap="#zoom" src="img/zoom.png" $img_attr /><br />
@@ -215,6 +215,7 @@ EOF
 
 if (($p{smode} || "") eq "temp") {
 	print <<EOF;
+					<div class="job" style="border: 1px solid rgb(255,255,  0)"></div>N/A <br clear="all" />
 					<div class="job" style="background-color: rgb(255,  0,  0)"></div>&gt;69C <br clear="all" />
 					<div class="job" style="background-color: rgb(255,102,  0)"></div>66-69C <br clear="all" />
 					<div class="job" style="background-color: rgb(255,153,  0)"></div>62-65C <br clear="all" />
