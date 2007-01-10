@@ -109,7 +109,7 @@ sub parse_nodes {
 
 	open NODEFH, "< " . _PATH_NODE or err(_PATH_NODE);
 	while (<NODEFH>) {
-		s/^\s+//;
+		s/^\s+|\s$//;
 		next if /^[#@]/;
 		next unless $_;
 
@@ -168,7 +168,10 @@ sub parse_yods {
 
 	open YODFH, "< " . _PATH_YOD or err(_PATH_YOD);
 	while (<YODFH>) {
-		chomp;
+		s/^\s+|\s$//;
+		next if /^[#@]/;
+		next unless $_;
+
 		my ($y_id, $y_partid, $y_ncpus, $y_cmd) = split /\s+/, $_, 4;
 		$yods{$y_id} = {
 			id	=> $y_id,
@@ -185,9 +188,13 @@ sub parse_jobs {
 
 	open JOBFH, "< " . _PATH_JOB or err(_PATH_JOB);
 	while (<JOBFH>) {
-		chomp;
+		s/^\s+|\s$//;
+		next if /^[#@]/;
+		next unless $_;
+
 		my ($j_id, $j_owner, $j_tmdur, $j_tmuse, $j_mem,
 		    $j_ncpus, $j_queue, $j_name) = split /\s+/, $_, 8;
+		next unless $jobs{$j_id};
 		$jobs{$j_id}{name}	= $j_name;
 		$jobs{$j_id}{owner}	= $j_owner;
 		$jobs{$j_id}{queue}	= $j_queue;
