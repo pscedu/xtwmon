@@ -197,9 +197,11 @@ print <<EOF;
 				<td>
 				 <a href="${click_url}click="><img alt="[3d]" border="0" src="$plot_url"
 				  width="$p_w" height="$p_h" ismap="ismap"
-					style="border: 1px solid white; margin-right: 2px" /></a><br />
+					style="border: 1px solid #336699; margin-right: 2px" /></a><br />
 				<div class="micro" style="float: right">
-					<a href="mailto:support\@psc.edu">Help</a> | Copyright &copy; 2005-2006
+					<a href="mailto:support\@psc.edu">Help</a> |
+					<a href="http://www.psc.edu/~yanovich/xt3dmon/">Native Clients</a> |
+					Copyright &copy; 2005-2006
 				  <a href="http://www.psc.edu/">Pittsburgh Supercomputing Center</a></div>
 EOF
 
