@@ -201,8 +201,8 @@ print <<EOF;
 				<div class="micro" style="float: right">
 					<a href="mailto:support\@psc.edu">Help</a> |
 					<a href="http://www.psc.edu/~yanovich/xt3dmon/">Native Clients</a> |
-					Copyright &copy; 2005-2006
-				  <a href="http://www.psc.edu/">Pittsburgh Supercomputing Center</a></div>
+					Copyright &copy; 2005-2007
+				  <a href="http://www.psc.edu/">Pittsburgh Supercomputing Center</a>&nbsp;</div>
 EOF
 
 if ($xtw->haspriv(PRIV_NONE)) {
