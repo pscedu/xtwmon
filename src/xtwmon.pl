@@ -64,8 +64,8 @@ my %yods;
 
 parse_colors();
 parse_nodes();
-parse_jobs();
 parse_yods();
+parse_jobs();
 
 {
 	my @keys = sort { $a <=> $b } keys %jobs;
@@ -202,6 +202,16 @@ sub parse_jobs {
 		$jobs{$j_id}{dur_want}	= $j_tmdur;
 		$jobs{$j_id}{dur_used}	= $j_tmuse;
 		$jobs{$j_id}{mem}	= $j_mem;
+
+		# Since the yod info is available, check
+		# if this job is running single-core.
+		if (exists $jobs{$j_id}{yodid}) {
+			my $y_id = $jobs{$j_id}{yodid};
+
+			$jobs{$j_id}{singlecore} = 1 if
+			    exists $yods{$y_id} &&
+			      $yods{$y_id}{cmd} =~ /\s-SN\b/;
+		}
 	}
 	close JOBFH;
 }
@@ -299,7 +309,8 @@ EOJS
 	@{[js_dynlink($ltext, "mkurl_job($jobid)")]}<br clear="all" />
 HTML
 		print JSF "\n\tj = new Job($jobid)\n";
-		foreach (qw(owner name queue dur_used dur_want ncpus mem yodid)) {
+		foreach (qw(owner name queue dur_used dur_want ncpus mem
+		    yodid singlecore)) {
 			print JSF "\tj.$_ = '$job->{$_}'\n" if exists $job->{$_};
 		}
 	}

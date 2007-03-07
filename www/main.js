@@ -106,6 +106,9 @@ function seljob(id) {
 			if (y.cmd)
 				pl.innerHTML += 'Yod command: ' + y.cmd + '<br />'
 		}
+
+		pl.innerHTML += 'Cores: ' +
+		    (j.singlecore ? 'single' : 'dual') + '<br />'
 	}
 }
 
