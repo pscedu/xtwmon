@@ -92,14 +92,14 @@ my %url_view = (
 	bg_forw	=> make_url($uri, \%p, z => $np{znbg}),
 	bg_left	=> make_url($uri, \%p, t => $np{tnbg}),
 	bg_right=> make_url($uri, \%p, t => $np{tpbg}),
-	bg_up		=> make_url($uri, \%p, p => $np{pnbg}),
+	bg_up	=> make_url($uri, \%p, p => $np{pnbg}),
 
 	sm_back	=> make_url($uri, \%p, z => $np{zpsm}),
 	sm_down	=> make_url($uri, \%p, p => $np{ppsm}),
 	sm_forw	=> make_url($uri, \%p, z => $np{znsm}),
 	sm_left	=> make_url($uri, \%p, t => $np{tnsm}),
 	sm_right=> make_url($uri, \%p, t => $np{tpsm}),
-	sm_up		=> make_url($uri, \%p, p => $np{pnsm}),
+	sm_up	=> make_url($uri, \%p, p => $np{pnsm}),
 );
 
 my %js_p;
@@ -133,23 +133,23 @@ $r->print(<<EOF);
 		<script type="text/javascript" src="$js_urls{yods}"></script>
 	</head>
 	<body>
-		<map name="zoom">
-			<area href="$url_view{bg_forw}" shape="rect" alt="zoom in" coords="0,0,71,17" />
-			<area href="$url_view{sm_forw}" shape="rect" alt="zoom in" coords="0,18,71,35" />
-			<area href="$url_view{sm_back}" shape="rect" alt="zoom out" coords="0,36,71,53" />
-			<area href="$url_view{bg_back}" shape="rect" alt="zoom out" coords="0,54,71,71" />
+		<map name="zoom" id="zoom">
+			<area href="$url_view{bg_forw}" shape="rect" alt="Zoom in"  title="Zoom In Far"	 coords="0,0,71,17" />
+			<area href="$url_view{sm_forw}" shape="rect" alt="Zoom in"  title="Zoom In"	 coords="0,18,71,35" />
+			<area href="$url_view{sm_back}" shape="rect" alt="Zoom out" title="Zoom Out"	 coords="0,36,71,53" />
+			<area href="$url_view{bg_back}" shape="rect" alt="Zoom out" title="Zoom Out Far" coords="0,54,71,71" />
 		</map>
-		<map name="horz">
-			<area href="$url_view{bg_right}" shape="rect" alt="rotate right" coords="0,0,17,71" />
-			<area href="$url_view{sm_right}" shape="rect" alt="rotate right" coords="18,0,35,71" />
-			<area href="$url_view{sm_left}" shape="rect" alt="rotate left" coords="36,0,53,71" />
-			<area href="$url_view{bg_left}" shape="rect" alt="rotate left" coords="54,0,71,71" />
+		<map name="horz" id="horz">
+			<area href="$url_view{bg_right}" shape="rect" alt="Rotate Right" title="Rotate Right"	coords="0,0,17,71" />
+			<area href="$url_view{sm_right}" shape="rect" alt="Rotate Right" title="Rotate Right"	coords="18,0,35,71" />
+			<area href="$url_view{sm_left}"  shape="rect" alt="Rotate Left"  title="Rotate Left"	coords="36,0,53,71" />
+			<area href="$url_view{bg_left}"  shape="rect" alt="Rotate Left"  title="Rotate Left"	coords="54,0,71,71" />
 		</map>
-		<map name="vert">
-			<area href="$url_view{bg_down}" shape="rect" alt="rotate down" coords="0,0,71,17" />
-			<area href="$url_view{sm_down}" shape="rect" alt="rotate down" coords="0,18,71,35" />
-			<area href="$url_view{sm_up}" shape="rect" alt="rotate up" coords="0,36,71,53" />
-			<area href="$url_view{bg_up}" shape="rect" alt="rotate up" coords="0,54,71,71" />
+		<map name="vert" id="vert">
+			<area href="$url_view{bg_down}"	shape="rect" alt="Rotate Down"	title="Rotate Down"	coords="0,0,71,17" />
+			<area href="$url_view{sm_down}"	shape="rect" alt="Rotate Down"	title="Rotate Down"	coords="0,18,71,35" />
+			<area href="$url_view{sm_up}"	shape="rect" alt="Rotate Up"	title="Rotate Up"	coords="0,36,71,53" />
+			<area href="$url_view{bg_up}"	shape="rect" alt="Rotate Up"	title="Rotate Up"	coords="0,54,71,71" />
 		</map>
 EOF
 
@@ -185,11 +185,11 @@ print <<EOF;
 		<table border="0" cellspacing="0" cellpadding="0">
 			<tr valign="top">
 				<td>
-					<a href="$urls{temp}"><img   alt="[temp]"   src="img/temp.png"   $img_attr /></a><br />
-					<a href="$urls{jobs}"><img   alt="[jobs]"   src="img/jobs.png"   $img_attr /></a><br />
-					<a href="$urls{wired}"><img  alt="[wired]"  src="img/wired.png"  $img_attr /></a><br />
-					<a href="$urls{phys}"><img   alt="[phys]"   src="img/phys.png"   $img_attr /></a><br />
-					<a href="$urls{reload}"><img alt="[reload]" src="img/reload.png" $img_attr /></a><br />
+					<a href="$urls{temp}"   title="Temperature Mode"><img   alt="[temp]"   src="img/temp.png"   $img_attr /></a><br />
+					<a href="$urls{jobs}"   title="Job Mode"><img   alt="[jobs]"   src="img/jobs.png"   $img_attr /></a><br />
+					<a href="$urls{wired}"  title="Wired Mode"><img  alt="[wired]"  src="img/wired.png"  $img_attr /></a><br />
+					<a href="$urls{phys}"   title="Physical Mode"><img   alt="[phys]"   src="img/phys.png"   $img_attr /></a><br />
+					<a href="$urls{reload}" title="Reload Data"><img alt="[reload]" src="img/reload.png" $img_attr /></a><br />
 					<!-- img alt="[pan]" usemap="#pan" src="img/pan.png" $img_attr / -->
 					<img alt="[zoom]" usemap="#zoom" src="img/zoom.png" $img_attr /><br />
 					<img alt="[horz]" usemap="#horz" src="img/rot-horz.png" $img_attr /><br />
