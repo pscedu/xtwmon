@@ -148,7 +148,7 @@ sub make_url {
 		if (exists $params{$_}) {
 			$url .= "$_=$params{$_}&amp;";
 			delete $params{$_};
-		} elsif (exists $rp->{$_} && $rp->{$_}) {
+		} elsif (exists $rp->{$_}) {
 			$url .= "$_=$rp->{$_}&amp;";
 		}
 	}
