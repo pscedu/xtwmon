@@ -77,7 +77,7 @@ function seljob(id) {
 		    (j.name  ? 'Name: '   + j.name  + '<br />' : '') +
 		    (j.owner ? 'Owner: '  + j.owner + '<br />' : '') +
 		    (j.queue ? 'Queue: '  + j.queue + '<br />' : '') +
-		    (j.ncpus ? 'NCPUS: '  + j.ncpus + '<br />' : '') +
+		    (j.ncpus ? '#cores: '  + j.ncpus + '<br />' : '') +
 		    (j.mem   ? 'Memory: ' + j.mem   + 'KB<br />' : '')
 		if (j.dur_used && j.dur_want) {
 			var du_hr = parseInt(j.dur_used / 60)
