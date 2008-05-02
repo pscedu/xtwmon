@@ -3,7 +3,7 @@
 function report(o) {
 	var s = ''
 	for (var i in o)
-		s += i + ' '
+		s += i + '=' + o[i] + '; '
 	alert(s)
 }
 
@@ -119,9 +119,11 @@ function url_getparams(s) {
 	var parts = search.split(/&(amp;)?/)
 	var params = defparams
 	for (var i in parts) {
-		var cnps = parts[i].split(/=/, 2)
-		if (cnps.length == 2)
-			params[cnps[0]] = cnps[1]
+		if (parts[i]) {
+			var cnps = parts[i].split(/=/, 2)
+			if (cnps.length == 2)
+				params[cnps[0]] = cnps[1]
+		}
 	}
 	return (params)
 }
