@@ -201,7 +201,7 @@ print <<EOF;
 				<div class="micro" style="float: right; white-space: nowrap">
 					<a href="mailto:support\@psc.edu">Help</a> |
 					<a href="http://www.psc.edu/~yanovich/xt3dmon/">Native Clients</a> |
-					Copyright &copy; 2005-2008
+					Copyright &copy; 2005-@{[(localtime)[5] + 1900]}
 				  <a href="http://www.psc.edu/">Pittsburgh Supercomputing Center</a>&nbsp;</div>
 EOF
 
