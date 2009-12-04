@@ -199,7 +199,7 @@ print <<EOF;
 				  width="$p_w" height="$p_h" ismap="ismap"
 					style="border: 1px solid #336699; margin-right: 2px" /></a><br />
 				<div class="micro" style="float: right; white-space: nowrap">
-					<a href="mailto:support\@psc.edu">Help</a> |
+					<a href="help.html" onclick="open('help.html', 'xt3dmon-help', 'width=500,height=230,resizable=1'); return false">Help</a> |
 					<a href="http://www.psc.edu/~yanovich/xt3dmon/">Native Clients</a> |
 					Copyright &copy; 2005-@{[(localtime)[5] + 1900]}
 				  <a href="http://www.psc.edu/">Pittsburgh Supercomputing Center</a>&nbsp;</div>

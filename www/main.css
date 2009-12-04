@@ -38,7 +38,6 @@ img {
 
 hr {
 	border: 0px;
-	border-top: 1px solid black;
+	border-top: 1px solid white;
 	height: 0px;
-	color: black;
 }
