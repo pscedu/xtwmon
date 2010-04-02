@@ -10,6 +10,27 @@ use warnings;
 my $r = shift;
 $r->content_type('text/html');
 my $cgi = CGI->new();
+
+$r->print(<<EOF);
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html lang="en-US" xml:lang="en-US" xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>BigBen XT3 Monitor</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+	</head>
+	<body>
+		<h1>PSC XT3 - Out of Service</h1>
+		<p>Our Cray XT3 is no longer operational.</p>
+		<hr />
+		<a href="http://www.psc.edu/">PSC</a>
+	</body>
+</html>
+EOF
+
+exit;
+
 my $xtw = XTWMon->new(cgi => $cgi);
 
 my %p;
